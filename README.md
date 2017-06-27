@@ -12,11 +12,11 @@ python scraper.py
 
 ## Motivation
 
-This scraper was created so that I could help my wife find a new job outside of California.  The code examples I mentioned above did not have good enough error handling nor a convenient output I could give my wife. 
+This scraper was created so that I could automate the job hunting process by doing multiple searches and filtering out the retrieved jobs.  The code examples I mentioned above did not have good enough error handling to search many states or titles, nor did they create the output I desired. 
 
 ## Installation
 
-In order to work on another machine you would need a client_secret.json file, along with a sparate file called private.py in the same directory.  The `private.py`file contains a dictionary of email.
+In order to work on another machine you would need a client_secret.json file that works for both Gmail and a Google sheets. The `pygsheets` docs have a pretty good walkthrough [here](http://pygsheets.readthedocs.io/en/latest/authorizing.html#oauth-credentials) , along with a separate file called private.py in the same directory.  The `private.py`file contains a dictionary of email.
 ```
 email = {
 	    'you' : 'you@email.com',
