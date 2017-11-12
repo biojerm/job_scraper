@@ -21,7 +21,7 @@ import private  # private.py has dictionary with emails
 dir_path = os.path.dirname(os.path.abspath(__file__))
 
 SCOPES = 'https://www.googleapis.com/auth/gmail.send'
-CLIENT_SECRET_FILE = os.path.join(dir_path, 'client_secret_2.json')
+CLIENT_SECRET_FILE = os.path.join(dir_path, 'client_secret_2.json') # replace with your client_secret.json file
 APPLICATION_NAME = 'Gmail API Python Quickstart'
 
 
@@ -104,7 +104,8 @@ def create_and_send_message(sender, reciever, subject, message):
     send_message(service, 'me', email_message)
 
 if __name__ == '__main__':
-    message = create_message(private.email['J'], private.email['J'], 'test subject', 'test body')
+    # Update these with emails from the private.py file if running as main method
+    message = create_message(private.email['J'], private.email['J'], 'test subject', 'test body') 
     credentials = get_credentials()
     http = credentials.authorize(httplib2.Http())
     service = discovery.build('gmail', 'v1', http=http)
