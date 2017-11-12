@@ -25,10 +25,6 @@ email = {
 ```
 
 
-## Tests
-
-I am not yet a skilled enough pythonista to write sufficient tests 
-
 ## License
 
 MIT License
