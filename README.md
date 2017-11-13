@@ -23,7 +23,7 @@ email = {
 	    'me'  : 'me@email.com',
 		}
 ```
-
+In scraper.py the email summary method will also need to be updated with the new email addresses from the private.py file.
 
 ## License
 
