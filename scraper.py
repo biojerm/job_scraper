@@ -257,9 +257,9 @@ def update_google_sheets(jobs):
     wks = sh.worksheet_by_title('Job Posts')
     try:
         if any(isinstance(i, list) for i in job_listings):
-            wks.insert_rows(row=1, number=len(job_listings), values=job_listings)
+            wks.insert_rows(row=7, number=len(job_listings), values=job_listings)
         else:
-            wks.insert_rows(row=1, values=job_listings)  # if only 1 job then only insert 1 row
+            wks.insert_rows(row=7, values=job_listings)  # if only 1 job then only insert 1 row
     except Exception as e:
         print('Insertion of data to google sheet failed.')
         print('Here is the error: {0}'.format(e))
