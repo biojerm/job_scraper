@@ -20,7 +20,7 @@ import private  # file with private information
 def salary_sufficient(salary):
 
     """
-    Salary can be found in a number of different formats (annual, hourly,
+   Salary can be found in a number of different formats (annual, hourly,
         monthly)
     """
     if salary == 'nothing found' or salary == 'Nothing_found':
@@ -30,16 +30,17 @@ def salary_sufficient(salary):
         return(int(min_salary) >= 120000)
     elif 'month' in salary:
         min_salary = re.search(r'^\$([0-9]+,[0-9]+)', salary).group(1).replace(',', '')
-        return(int(min_salary)*12 >= 120000)
+        return(int(min_salary) * 12 >= 120000)
     elif 'hour' in salary:
         try:
             min_salary = re.search(r'^\$([0-9]+\.[0-9]+)', salary).group(1).replace('.', '')
         except:
             min_salary = re.search(r'^\$([0-9]+)', salary).group(1).replace('.', '')
-        return((float(min_salary)*40*52) >= 120000)
+        return((float(min_salary) * 40 * 52) >= 120000)
     else:
         print('could not parse salary value was: {0}'.format(salary))
         return(False)
+
 
 stop_words = set(stopwords.words('english'))
 
@@ -81,6 +82,7 @@ def title_score(title):
         score -= 2
     return(score)
 
+
 rejected_request = 0  # used for error tracking
 max_results_per_city = 20
 query_set = [
@@ -89,17 +91,14 @@ query_set = [
     'Missouri', 'Minnesota', 'Michigan', 'Wisconsin', 'Illinois', 'Ohio',
     'West+Virgina', 'North+Carolina', 'South+Carolina', 'Virgina', 'Maryland',
     'Pennsylvania', 'New+York', 'New+Jersey', 'Delaware', 'Massachusetts',
-    'Vermont', 'New+Hampshire', 'Maine', 'Tennessee', 'Iowa'
-             ]
+    'Vermont', 'New+Hampshire', 'Maine', 'Tennessee', 'Iowa']
 job_titles = [
-              'tax+attorney', 'international+tax+planning', 'tax+planning',
-              'tax+associate'
-             ]
+    'tax+attorney', 'international+tax+planning', 'tax+planning',
+    'tax+associate']
 
 columns = [
     'capture_date', 'job_title', 'company_name', 'city', 'state', 'summary',
-    'link', 'salary'
-          ]
+    'link', 'salary']
 job_listings = pd.DataFrame(columns=columns)
 
 # Web scraping code:
@@ -211,7 +210,7 @@ bad_titles = [
     'Program Budget Lead', 'Auto Delivery Specialist', 'Relationship',
     'Coder', 'WEALTH', 'part time', 'Billing', 'Trust Officer', 'QA', 'CEO',
     'CFO', 'Scientist'
-    ]
+]
 bad_title_index = []
 for row in salary_filtered.job_title:
     comparison = []
@@ -228,7 +227,7 @@ bad_companies = [
     'Scott Credit Union', 'Royal American Management, Inc.', 'Block Advisors',
     'Mercer Transportation', 'Transportation Security Administration',
     'HR block'
-    ]
+]
 bad_company_index = []
 for row in title_filtered.company_name:
     comparison = []
@@ -236,8 +235,8 @@ for row in title_filtered.company_name:
         comparison.append(company in row)
     bad_company_index.append(not any(comparison))
 bad_companies_filtered = title_filtered[bad_company_index].copy()
-# scoring summary based on relevance 
-bad_companies_filtered.loc[:, 'score'] = bad_companies_filtered.summary.apply(summary_score).copy()
+# scoring summary based on relevance
+bad_companies_filtered.loc[:, 'score'] = (bad_companies_filtered.summary.apply(summary_score).copy())
 # scoring title based on relevance
 bad_companies_filtered['score'] += bad_companies_filtered.job_title.apply(title_score)
 filtered_jobs = bad_companies_filtered[bad_companies_filtered.score > 2].sort_values('score', ascending=False).copy()

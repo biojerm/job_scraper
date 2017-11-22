@@ -178,15 +178,13 @@ def indeed_search(locations, job_titles):
     end_time = datetime.now()
     print('Web scraping took {0}'.format(end_time - start_time))
     return(job_listings)
-   
 
 
 def filter_found_jobs(job_results):
     '''
-    Takes queried job results dataframe from indeed job search and 
+    Takes queried job results dataframe from indeed job search and
     filters out the results to a more managable size
     '''
-                        
     # Selection of companies and job titles that are not relevant
     bad_titles = [
         'paralegal', 'Paralegal', 'secretary', 'Secretary', 'clerk', 'Clerk',
@@ -213,7 +211,7 @@ def filter_found_jobs(job_results):
         'Program Budget Lead', 'Auto Delivery Specialist', 'Relationship',
         'Coder', 'WEALTH', 'part time', 'Billing', 'Trust Officer', 'QA', 'CEO',
         'CFO', 'Scientist'
-        ]
+    ]
     bad_companies = [
         'Block Advisors Tax and Business Services', 'The Vitamin Shoppe',
         'Staffing', 'H&R Block', 'FirstService Residential', 'Allied Universal',
@@ -221,10 +219,10 @@ def filter_found_jobs(job_results):
         'Scott Credit Union', 'Royal American Management, Inc.', 'Block Advisors',
         'Mercer Transportation', 'Transportation Security Administration',
         'HR block'
-        ]
+    ]
     # filtering out duplicate entries
     remove_duplicates_df = job_results.drop_duplicates(subset=['job_title', 'company_name', 'city', 'state', 'summary'], keep='first').copy()
-    remove_duplicates_df.drop_duplicates(subset='link', keep='first',inplace=True)
+    remove_duplicates_df.drop_duplicates(subset='link', keep='first', inplace=True)
     # The word 'tax' must be in the summary
     tax_in_summary_index = ['tax' in row or 'Tax' in row for row in remove_duplicates_df['summary']]
     # Check if salary is sufficient in posting
@@ -232,16 +230,14 @@ def filter_found_jobs(job_results):
     # Removing specific companies and job titles
     bad_title_index = ~remove_duplicates_df.job_title.isin(bad_titles)
     bad_company_index = ~remove_duplicates_df.company_name.isin(bad_companies)
-    
     # applying all filtration jobs dataframe
     unscored_jobs_df = remove_duplicates_df.loc[tax_in_summary_index & salary_index & bad_title_index & bad_company_index, :].copy()
-        
-    # scoring summary based on relevance 
+    # scoring summary based on relevance
     unscored_jobs_df.loc[:, 'score'] = unscored_jobs_df.summary.apply(summary_score)
     # scoring title based on relevance
-    unscored_jobs_df.loc[:,'score'] += unscored_jobs_df.job_title.apply(title_score)
+    unscored_jobs_df.loc[:, 'score'] += unscored_jobs_df.job_title.apply(title_score)
     filtered_jobs = unscored_jobs_df[unscored_jobs_df.score > 2].sort_values('score', ascending=False)
-    
+
     print('Creating log, {} jobs found'.format(len(filtered_jobs)))
     return(filtered_jobs)
 
@@ -251,7 +247,7 @@ def update_google_sheets(jobs):
     job_listings = jobs.values.tolist()
     print("{0} jobs found, starting upload to Google sheet.".format(len(job_listings)))
     dir_path = os.path.dirname(os.path.abspath(__file__))
-    gc = pygsheets.authorize(service_file=os.path.join(dir_path, 'client_secret.json'), no_cache=True )
+    gc = pygsheets.authorize(service_file=os.path.join(dir_path, 'client_secret.json'), no_cache=True)
     # Open spreadsheet and then worksheet
     sh = gc.open('Indeed Job Sheet')
     wks = sh.worksheet_by_title('Job Posts')
@@ -264,11 +260,11 @@ def update_google_sheets(jobs):
         print('Insertion of data to google sheet failed.')
         print('Here is the error: {0}'.format(e))
 
+
 def email_summary(jobs):
     '''
     Sends an email summary of jobs found.  Would need to update private.py file and private.email['x'] below
     to work on other instument
-    
     '''
     filtered_jobs = jobs.copy()
     # # Send summary email. Most code in gmail_sender.py
@@ -282,5 +278,3 @@ if __name__ == '__main__':
     jobs = filter_found_jobs(indeed_search(query_set, job_titles))
     update_google_sheets(jobs)
     email_summary(jobs)
-    
-

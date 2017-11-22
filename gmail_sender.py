@@ -103,9 +103,10 @@ def create_and_send_message(sender, reciever, subject, message):
 
     send_message(service, 'me', email_message)
 
+
 if __name__ == '__main__':
     # Update these with emails from the private.py file if running as main method
-    message = create_message(private.email['J'], private.email['J'], 'test subject', 'test body') 
+    message = create_message(private.email['J'], private.email['J'], 'test subject', 'test body')
     credentials = get_credentials()
     http = credentials.authorize(httplib2.Http())
     service = discovery.build('gmail', 'v1', http=http)
