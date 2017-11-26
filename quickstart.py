@@ -16,7 +16,7 @@ except ImportError:
 
 # If modifying these scopes, delete your previously saved credentials
 # at ~/.credentials/gmail-python-quickstart.json
-SCOPES = ['https://www.googleapis.com/auth/gmail.send '+'https://www.googleapis.com/auth/spreadsheets']
+SCOPES = ['https://www.googleapis.com/auth/gmail.send ' + 'https://www.googleapis.com/auth/spreadsheets']
 CLIENT_SECRET_FILE = 'client_secret_2.json'
 APPLICATION_NAME = 'Gmail API Python Quickstart'
 

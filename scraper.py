@@ -2,7 +2,6 @@
 #!/home/jeremy/miniconda3/envs/py3k/bin/python
 from datetime import datetime
 import os
-import sys
 import re
 import requests
 import time
@@ -21,7 +20,6 @@ import private  # file with private information
 # ### Helper Methods ###
 
 def salary_sufficient(salary):
-
     """
     Salary can be found in a number of different formats (annual, hourly,
         monthly)
@@ -37,17 +35,18 @@ def salary_sufficient(salary):
             return(False)
     elif 'month' in salary:
         min_salary = re.search(r'\$([0-9]+,[0-9]+)', salary).group(1).replace(',', '')
-        return(int(min_salary)*12 >= 120000)
+        return(int(min_salary) * 12 >= 120000)
     elif 'hour' in salary:
         try:
             min_salary = re.search(r'\$([0-9]+\.[0-9]+)', salary).group(1).replace('.', '')
         except:
             min_salary = re.search(r'\$([0-9]+)', salary).group(1).replace('.', '')
-        return((float(min_salary)*40*52) >= 120000)
+        return((float(min_salary) * 40 * 52) >= 120000)
     else:
         print('could not parse salary value was: {0}'.format(salary))
         return(False)
-    
+
+
 def summary_score(summary):
     """
     Assigns a score to the the summary add points to good_words and
@@ -70,6 +69,7 @@ def summary_score(summary):
             score -= 1
     return(score)
 
+
 def title_score(title):
     """
      The word tax must be in the first, second, or last word of title.
@@ -85,6 +85,7 @@ def title_score(title):
         score -= 2
     return(score)
 
+
 query_set = [
     'California', 'Oregon', 'Washington', 'Nevada', 'Utah', 'Colorado',
     'Montana', 'Idaho', 'Wyoming', 'Nebraska', 'New+Mexico', 'Texas',
@@ -92,15 +93,16 @@ query_set = [
     'West+Virgina', 'North+Carolina', 'South+Carolina', 'Virgina', 'Maryland',
     'Pennsylvania', 'New+York', 'New+Jersey', 'Delaware', 'Massachusetts',
     'Vermont', 'New+Hampshire', 'Maine', 'Tennessee', 'Iowa'
-             ]
+]
 job_titles = [
-              'tax+attorney', 'international+tax+planning', 'tax+planning',
-              'tax+associate'
-             ]
+    'tax+attorney', 'international+tax+planning', 'tax+planning',
+    'tax+associate'
+]
+
 
 def indeed_search(locations, job_titles):
     '''
-    returns a dataframe with job postings from indeed.com using API. 
+    returns a dataframe with job postings from indeed.com using API.
     Provide array of locations and job titles to search
     '''
     query_set = locations
@@ -108,7 +110,7 @@ def indeed_search(locations, job_titles):
     columns = [
         'capture_date', 'job_title', 'company_name', 'city', 'state', 'summary',
         'link', 'salary'
-          ]
+    ]
     job_listings = pd.DataFrame(columns=columns)
 
     # Web scraping code:

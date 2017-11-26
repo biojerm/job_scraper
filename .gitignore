@@ -41,7 +41,6 @@ Thumbs.db
 *.csv
 *.sublime-workspace
 *.sublime-project
-*.txt
 *.xlsx
 file_dump/
 __pycache__/

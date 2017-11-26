@@ -21,7 +21,7 @@ import private  # private.py has dictionary with emails
 dir_path = os.path.dirname(os.path.abspath(__file__))
 
 SCOPES = 'https://www.googleapis.com/auth/gmail.send'
-CLIENT_SECRET_FILE = os.path.join(dir_path, 'client_secret_2.json') # replace with your client_secret.json file
+CLIENT_SECRET_FILE = os.path.join(dir_path, 'client_secret_2.json')  # replace with your client_secret.json file
 APPLICATION_NAME = 'Gmail API Python Quickstart'
 
 
