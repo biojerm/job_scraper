@@ -9,6 +9,7 @@ from email.mime.text import MIMEText
 import base64
 
 from apiclient import discovery
+import oauth2client
 from oauth2client import client
 from oauth2client import tools
 from oauth2client.file import Storage
@@ -21,38 +22,25 @@ import private  # private.py has dictionary with emails
 dir_path = os.path.dirname(os.path.abspath(__file__))
 
 SCOPES = 'https://www.googleapis.com/auth/gmail.send'
-CLIENT_SECRET_FILE = os.path.join(dir_path, 'client_secret_2.json')  # replace with your client_secret.json file
+CLIENT_SECRET_FILE = 'client_secret_gmail.json'  # replace with your client_secret.json file
 APPLICATION_NAME = 'Gmail API Python Quickstart'
 
 
 def get_credentials():
-    """Gets valid user credentials from storage.
-
-    If nothing has been stored, or if the stored credentials are invalid,
-    the OAuth2 flow is completed to obtain the new credentials.
-
-    Returns:
-        Credentials, the obtained credential.
-    """
     home_dir = os.path.expanduser('~')
     credential_dir = os.path.join(home_dir, '.credentials')
     if not os.path.exists(credential_dir):
         os.makedirs(credential_dir)
     credential_path = os.path.join(credential_dir,
-                                   'gmail-python-quickstart.json')
-
-    store = Storage(credential_path)
+                                   'gmail-python-email-send.json')
+    store = oauth2client.file.Storage(credential_path)
     credentials = store.get()
     if not credentials or credentials.invalid:
         flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
         flow.user_agent = APPLICATION_NAME
-        if flags:
-            credentials = tools.run_flow(flow, store, flags)
-        else:  # Needed only for compatibility with Python 2.6
-            credentials = tools.run(flow, store)
+        credentials = tools.run_flow(flow, store)
         print('Storing credentials to ' + credential_path)
     return credentials
-
 
 def create_message(sender, to, subject, message_text):
     """Create a message for an email.

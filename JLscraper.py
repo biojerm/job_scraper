@@ -58,8 +58,7 @@ def summary_score(summary):
     summary_no_stop = [token for token in tokenized_summary if token not in stop_words]
 
     # keep these all lowercase
-    good_words = ['tax', 'international', 'corporate', 'law', 'attorney',
-                  'LLM', 'planning']
+    good_words = ['Python', 'Biology', 'biology', ]
     bad_words = ['preparation', 'gift tax', 'estates', 'cpa', 'controller']
 
     for word in summary_no_stop:
@@ -79,7 +78,7 @@ def title_score(title):
     """
     score = 0
     token_title = word_tokenize(title.lower())
-    if 'tax' in token_title[0:2] or 'tax' in token_title[-1]:
+    if 'biology' in token_title[0:2] or 'Biology' in token_title[-1]:
         score += 2
     else:
         score -= 2
@@ -87,16 +86,14 @@ def title_score(title):
 
 
 query_set = [
-    'California', 'Oregon', 'Washington', 'Nevada', 'Utah', 'Colorado',
-    'Montana', 'Idaho', 'Wyoming', 'Nebraska', 'New+Mexico', 'Texas',
-    'Missouri', 'Minnesota', 'Michigan', 'Wisconsin', 'Illinois', 'Ohio',
-    'West+Virgina', 'North+Carolina', 'South+Carolina', 'Virgina', 'Maryland',
-    'Pennsylvania', 'New+York', 'New+Jersey', 'Delaware', 'Massachusetts',
-    'Vermont', 'New+Hampshire', 'Maine', 'Tennessee', 'Iowa'
+    'California', 'Oregon', 'Washington', 'Colorado', 'Texas',
+    'Minnesota', 'Michigan', 'Wisconsin', 'Illinois', 'Ohio', 'Virgina',
+     'Maryland','Pennsylvania', 'New+York', 'New+Jersey', 'Delaware', 
+     'Massachusetts', 'Iowa'
 ]
 job_titles = [
-    'tax+attorney', 'international+tax+planning', 'tax+planning',
-    'tax+associate'
+    'biology+data+analyst', 'bioinformatics+scientist', 'computational+biologist', 'data+analyst',
+    'bioinformatics+analyst', 'bioinformatics+associate'
 ]
 
 
@@ -189,39 +186,10 @@ def filter_found_jobs(job_results):
     '''
     # Selection of companies and job titles that are not relevant
     bad_titles = [
-        'paralegal', 'Paralegal', 'secretary', 'Secretary', 'clerk', 'Clerk',
-        'closer', 'Closer', 'Engineer', 'engineer', 'service', 'Service', 'Care',
-        'care', 'Administrator', 'administrator', 'accountant', 'Accountant',
-        'customer', 'Customer', 'nurse', 'Nurse', 'Help', 'help', 'science',
-        'Science', 'loan', 'Loan', 'energy', 'Energy', 'marketing', 'Marketing',
-        'assistant', 'Assistant', 'CPA', 'Research', 'research', 'PARALEGAL',
-        'Financial Advisor', 'HR', 'Licensing Specialist', 'Furnishings Officer',
-        'Intern', 'Licensed Customs Broker', 'Real Estate', 'Neurology',
-        'Physician', 'Lending', 'Financial Controller', 'Accounts Payable',
-        'payroll', 'Payroll', 'Justice', 'sales', 'Sales', 'Finance Manager',
-        'Retail', 'Bookkeeper', 'Banker', 'IT', 'RN', 'Buyer', 'Accounting',
-        'Mortgage', 'Shared Living Provider', 'Night Auditor',
-        'Relationship Associate', 'product specialist', 'Title Agent',
-        'WM Investment', 'Receptionist', 'Sourcing', 'SOURCING', 'Clinic',
-        'Property', 'Business Analyst', 'Developer', 'Administrative',
-        'Collections', 'Preparer', 'Architect', 'Mobility', 'Wealth', 'WM',
-        'Pricing', 'Estate', 'Information Technology', 'Financial Analyst',
-        'Fixed Income', 'Valuation', 'Creative', 'Escrow', 'Benefits Attorney',
-        'Cashier', 'Compliance Specialist', 'Front Desk Supervisor',
-        'People & Culture Sr. Associate', 'Staffing Coordinator', 'Technician',
-        'Part-time', 'Actuarial', 'RETAIL', 'HUD', 'LIHCT', 'Supply Chain',
-        'Program Budget Lead', 'Auto Delivery Specialist', 'Relationship',
-        'Coder', 'WEALTH', 'part time', 'Billing', 'Trust Officer', 'QA', 'CEO',
-        'CFO', 'Scientist'
+        'manager', 'Manager'
     ]
     bad_companies = [
-        'Block Advisors Tax and Business Services', 'The Vitamin Shoppe',
-        'Staffing', 'H&R Block', 'FirstService Residential', 'Allied Universal',
-        'CareOregon, Inc.', 'Catholic Charities', 'Golden Nugget',
-        'Scott Credit Union', 'Royal American Management, Inc.', 'Block Advisors',
-        'Mercer Transportation', 'Transportation Security Administration',
-        'HR block'
-    ]
+        'University', 'Comcast', 'Intuit'    ]
     # filtering out duplicate entries
     remove_duplicates_df = job_results.drop_duplicates(subset=['job_title', 'company_name', 'city', 'state', 'summary'], keep='first').copy()
     remove_duplicates_df.drop_duplicates(subset='link', keep='first', inplace=True)
@@ -249,7 +217,7 @@ def update_google_sheets(jobs):
     job_listings = jobs.values.tolist()
     print("{0} jobs found, starting upload to Google sheet.".format(len(job_listings)))
     dir_path = os.path.dirname(os.path.abspath(__file__))
-    gc = pygsheets.authorize(service_file=os.path.join(dir_path, 'jobsheet-auth.json'), no_cache=True)
+    gc = pygsheets.authorize(service_file=os.path.join(dir_path, 'client_secret.json'), no_cache=True)
     # Open spreadsheet and then worksheet
     sh = gc.open('Indeed Job Sheet')
     wks = sh.worksheet_by_title('Job Posts')
@@ -266,7 +234,7 @@ def update_google_sheets(jobs):
 def email_summary(jobs):
     '''
     Sends an email summary of jobs found.  Would need to update private.py file and private.email['x'] below
-    to work on other instument
+    to work on other instrument
     '''
     filtered_jobs = jobs.copy()
     # # Send summary email. Most code in gmail_sender.py
@@ -277,6 +245,12 @@ def email_summary(jobs):
 
 
 if __name__ == '__main__':
-    jobs = filter_found_jobs(indeed_search(query_set, job_titles))
-    update_google_sheets(jobs)
-    email_summary(jobs)
+    # jobs = filter_found_jobs(indeed_search(query_set, job_titles))
+    # update_google_sheets(jobs)
+    # email_summary(jobs)
+    print('started scraping')
+    jobs = indeed_search(query_set, job_titles)
+    writer = pd.ExcelWriter('Jeremyoutput.xlsx')
+    jobs.to_excel(writer,'Sheet1')
+    print('all done')
+    writer.save()
