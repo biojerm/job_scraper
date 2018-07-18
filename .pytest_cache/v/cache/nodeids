@@ -1,0 +1,19 @@
+[
+  "test_scraper.py::test_salary_sufficient_when_nothing_found[nothing found-True]",
+  "test_scraper.py::test_salary_sufficient_when_nothing_found[Nothing_found-True]",
+  "test_scraper.py::test_salary_sufficient_when_nothing_found[Anything else-False]",
+  "test_scraper.py::test_annual_salary_greater_120000[$120,001 per year-True]",
+  "test_scraper.py::test_annual_salary_greater_120000[$99,999 per year-False]",
+  "test_scraper.py::test_annual_salary_greater_120000[120001.01 per year-True]",
+  "test_scraper.py::test_annual_salary_greater_120000[99999.93 per year-False]",
+  "test_scraper.py::test_annual_salary_greater_120000[$10,001 per month-True]",
+  "test_scraper.py::test_annual_salary_greater_120000[$9,999 per month-False]",
+  "test_scraper.py::test_annual_salary_greater_120000[12,0000 per month-True]",
+  "test_scraper.py::test_annual_salary_greater_120000[99.93 per month-False]",
+  "test_scraper.py::test_annual_salary_greater_120000[$57.70 per hour-True]",
+  "test_scraper.py::test_annual_salary_greater_120000[38 per hour-False]",
+  "test_scraper.py::test_annual_salary_greater_120000[75 per hour-True]",
+  "test_scraper.py::test_annual_salary_greater_120000[9.93 per hour-False]",
+  "test_scraper.py::test_if_annual_salary_cannot_be_parsed[$one billion per year]",
+  "test_scraper.py::test_if_annual_salary_cannot_be_parsed[not real numbers per year]"
+]

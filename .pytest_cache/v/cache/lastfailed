@@ -1,0 +1,6 @@
+{
+  "test_scraper.py::test_anual_salary_greater_120000[$992999 per year-False]": true,
+  "test_scraper.py::test_if_anual_salary_cannot_be_parsed[$120,001 per year]": true,
+  "test_scraper.py::test_if_anual_salary_cannot_be_parsed[$120001 per year]": true,
+  "test_scraper.py::test_salary_sufficient_when_nothing_found[nothing_found-True]": true
+}

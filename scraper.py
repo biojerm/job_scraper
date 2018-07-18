@@ -24,27 +24,24 @@ def salary_sufficient(salary):
     Salary can be found in a number of different formats (annual, hourly,
         monthly)
     """
-    if salary == 'nothing found' or salary == 'Nothing_found':
-        return(True)
-    elif 'year' in salary:
-        try:
-            min_salary = re.search(r'\$([0-9]+,[0-9]+)', salary).group(1).replace(',', '')
-            return(int(min_salary) >= 120000)
-        except:
-            print('could not parse salary value was: {0}'.format(salary))
-            return(False)
-    elif 'month' in salary:
-        min_salary = re.search(r'\$([0-9]+,[0-9]+)', salary).group(1).replace(',', '')
-        return(int(min_salary) * 12 >= 120000)
-    elif 'hour' in salary:
-        try:
-            min_salary = re.search(r'\$([0-9]+\.[0-9]+)', salary).group(1).replace('.', '')
-        except:
-            min_salary = re.search(r'\$([0-9]+)', salary).group(1).replace('.', '')
-        return((float(min_salary) * 40 * 52) >= 120000)
-    else:
+    currency_regex = r'[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?'
+    try:
+        if salary == 'nothing found' or salary == 'Nothing_found':
+            return True
+        elif 'year' in salary:
+            min_salary = re.search(currency_regex, salary).group(0).replace(',', '')
+            return int(float(min_salary)) >= 120000
+        elif 'month' in salary:
+            min_salary = re.search(currency_regex, salary).group(0).replace(',', '')
+            return int(float(min_salary)) * 12 >= 120000
+        elif 'hour' in salary:
+            min_salary = re.search(currency_regex, salary).group(0)
+            return float(min_salary) * 40 * 52 >= 120000
+        else:
+            raise ValueError("Salary Parsing Error")
+    except:
         print('could not parse salary value was: {0}'.format(salary))
-        return(False)
+        return False
 
 
 def summary_score(summary):
