@@ -170,48 +170,49 @@ def indeed_search(locations, job_titles):
                 time.sleep(3)  # ensuring at least 3 seconds between page requests
                
                 #this can be it's own function.  I Wrote the function above to accept the page.text
-                soup = BeautifulSoup(page.text, 'lxml')
-                for div in soup.find_all(name='div', attrs={'class': 'row'}):
-                    job_post = []
-                    job_post.append(str(datetime.now().date()))
-                    # grabbing job title
-                    for a in div.find_all(name='a', attrs={'data-tn-element': 'jobTitle'}):
-                        job_post.append(a['title'])
-                    # grabbing company name
-                    company = div.find_all(name='span', attrs={'class': 'company'})
-                    if len(company) > 0:
-                        for b in company:
-                            job_post.append(b.text.strip())
-                    else:
-                        sec_try = div.find_all(name='span', attrs={'class': 'result-link-source'})
-                        for span in sec_try:
-                            job_post.append(span.text)
-                    # grabbing city and state
-                    c = div.findAll('span', attrs={'class': 'location'})
-                    for span in c:
-                        try:
-                            job_post.append(re.search(r'(^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*)(, )([A-Z]{2})', span.text).group(1))
-                            job_post.append(re.search(r'(^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*)(, )([A-Z]{2})', span.text).group(3))
-                        except:
-                            job_post.append('No information found')
-                            job_post.append('No information found')
-                    # grabbing summary text
-                    d = div.findAll('span', attrs={'class': 'summary'})
-                    for span in d:
-                        job_post.append(span.text.strip())
-                    # grabbing job URL
-                    for link_div in div.find_all(name='a', attrs={'data-tn-element': 'jobTitle'}):
-                        job_post.append('www.indeed.com' + link_div['href'])
-                    # grabbing salary
-                    try:
-                        job_post.append(div.find('nobr').text)
-                    except:
-                        try:
-                            div_two = div.find(name='div', attrs={'class': 'sjcl'})
-                            div_three = div_two.find('div')
-                            job_post.append(div_three.text.strip())
-                        except:
-                            job_post.append('Nothing_found')
+                job_post = parse_posting(page.text)
+                # soup = BeautifulSoup(page.text, 'lxml')
+                # for div in soup.find_all(name='div', attrs={'class': 'row'}):
+                #     job_post = []
+                #     job_post.append(str(datetime.now().date()))
+                #     # grabbing job title
+                #     for a in div.find_all(name='a', attrs={'data-tn-element': 'jobTitle'}):
+                #         job_post.append(a['title'])
+                #     # grabbing company name
+                #     company = div.find_all(name='span', attrs={'class': 'company'})
+                #     if len(company) > 0:
+                #         for b in company:
+                #             job_post.append(b.text.strip())
+                #     else:
+                #         sec_try = div.find_all(name='span', attrs={'class': 'result-link-source'})
+                #         for span in sec_try:
+                #             job_post.append(span.text)
+                #     # grabbing city and state
+                #     c = div.findAll('span', attrs={'class': 'location'})
+                #     for span in c:
+                #         try:
+                #             job_post.append(re.search(r'(^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*)(, )([A-Z]{2})', span.text).group(1))
+                #             job_post.append(re.search(r'(^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*)(, )([A-Z]{2})', span.text).group(3))
+                #         except:
+                #             job_post.append('No information found')
+                #             job_post.append('No information found')
+                #     # grabbing summary text
+                #     d = div.findAll('span', attrs={'class': 'summary'})
+                #     for span in d:
+                #         job_post.append(span.text.strip())
+                #     # grabbing job URL
+                #     for link_div in div.find_all(name='a', attrs={'data-tn-element': 'jobTitle'}):
+                #         job_post.append('www.indeed.com' + link_div['href'])
+                #     # grabbing salary
+                #     try:
+                #         job_post.append(div.find('nobr').text)
+                #     except:
+                #         try:
+                #             div_two = div.find(name='div', attrs={'class': 'sjcl'})
+                #             div_three = div_two.find('div')
+                #             job_post.append(div_three.text.strip())
+                #         except:
+                #             job_post.append('Nothing_found')
                     try:
                         job_posting = pd.DataFrame([job_post], columns=columns)
                         job_listings = job_listings.append(job_posting)

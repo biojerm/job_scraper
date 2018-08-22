@@ -8,12 +8,20 @@
   "test_scraper.py::test_annual_salary_greater_120000[99999.93 per year-False]",
   "test_scraper.py::test_annual_salary_greater_120000[$10,001 per month-True]",
   "test_scraper.py::test_annual_salary_greater_120000[$9,999 per month-False]",
-  "test_scraper.py::test_annual_salary_greater_120000[12,0000 per month-True]",
+  "test_scraper.py::test_annual_salary_greater_120000[12,000 per month-True]",
   "test_scraper.py::test_annual_salary_greater_120000[99.93 per month-False]",
   "test_scraper.py::test_annual_salary_greater_120000[$57.70 per hour-True]",
   "test_scraper.py::test_annual_salary_greater_120000[38 per hour-False]",
   "test_scraper.py::test_annual_salary_greater_120000[75 per hour-True]",
   "test_scraper.py::test_annual_salary_greater_120000[9.93 per hour-False]",
+  "test_scraper.py::test_annual_salary_greater_120000[$25 - $40 an hour-False]",
   "test_scraper.py::test_if_annual_salary_cannot_be_parsed[$one billion per year]",
-  "test_scraper.py::test_if_annual_salary_cannot_be_parsed[not real numbers per year]"
+  "test_scraper.py::test_if_annual_salary_cannot_be_parsed[not real numbers per year]",
+  "test_scraper.py::test_summary_scoring",
+  "test_scraper.py::test_job_title_scoring[Sr Tax manager-2]",
+  "test_scraper.py::test_job_title_scoring[tax planner-2]",
+  "test_scraper.py::test_job_title_scoring[Real Estate Planner--2]",
+  "test_scraper.py::test_job_title_scoring[random position tax-2]",
+  "test_scraper.py::test_indeed_url",
+  "test_scraper.py::test_parse_posting"
 ]
