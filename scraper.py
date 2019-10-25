@@ -1,4 +1,3 @@
-
 #!/home/jeremy/miniconda3/envs/py3k/bin/python
 from datetime import datetime
 import os
