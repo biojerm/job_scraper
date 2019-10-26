@@ -80,7 +80,7 @@ def test_parse_posting(job_listings):
 	assert job_details[-1][2] == 'Bennet Shay CPAs', 'Third element is the company name'
 	assert job_details[-1][3] == 'Santa Clara', 'Fourth element is the city'
 	assert job_details[-1][4] == 'CA', 'Fifth element is the State' # or love ;)
-	assert job_details[-1][5] == 'Create estimate tax envelopes and tax filings. Tax Assistant â€“ 45%. File annual property tax reports. Data entry of client tax documents....', 'Sixth element is a summary of the job'
+	assert job_details[-1][5] == 'Create estimate tax envelopes and tax filings. Tax Assistant – 45%. File annual property tax reports. Data entry of client tax documents....', 'Sixth element is a summary of the job'
 	assert job_details[-1][6] == 'www.indeed.com/pagead/clk?mo=r&ad=-6NYlbfkN0AnFnp7dmWfQ3fR6EGyjMo1ArRAXIGEJnVLL94bXtaM9tTCmkH5jcm3mrgBiBE8efeWahpkqcYEIe86fy_D_iOyBR30XTByePKyter7098zmkga8PZHFT0AD45QdCPD_HyAFO3Wbaq-HFHacunYXRmbMgxYdCa1-LpWN1x8USld0eHT6LfEsuP6frsqEEDbY6qDtrc4ahyR0NSuSRRQLjcaS-h5soioNE0wNw4Ids0BhZwKw_5BFvuVopGSrf7n3gF1dw5065UHTbTgIN7MHaPbsYs6tIz93RiT-RpaNDdIgU8NGMrdKSrPAvT7L7PuDUxKxHgFZ9OrY2cDDEDfMP66_xIsoSt3176Zt3hQiKb7j5hHZ4Kn8CtKwEWJEFN5pIuCSGiGzfnV8xFZR7wHhxnUJ00WtodjaD10q5CmIz56vaz34fX2j7ksodNW4bNGx2k=&vjs=3&p=5&sk=&fvj=1', 'Seventh element is the URL of the job'
 	assert job_details[-1][7] == '$17 - $20 an hour'
  

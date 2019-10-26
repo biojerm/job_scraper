@@ -1,4 +1,5 @@
 #!/home/jeremy/miniconda3/envs/py3k/bin/python
+# coding: utf-8
 from datetime import datetime
 import os
 import re
@@ -11,10 +12,12 @@ from nltk.corpus import stopwords
 import pandas as pd
 import pygsheets
 
+
 # files with helper methods and private passwords/keys/emailaddresses
 import gmail_sender as email
 import private  # file with private information
 
+import pdb
 
 # ### Helper Methods ###
 
@@ -23,28 +26,24 @@ def salary_sufficient(salary):
     Salary can be found in a number of different formats (annual, hourly,
         monthly)
     """
-    if salary == 'nothing found' or salary == 'Nothing_found':
-        return(True)
-    elif 'year' in salary:
-        try:
-            min_salary = re.search(r'\$([0-9]+,[0-9]+)', salary).group(1).replace(',', '')
-            return(int(min_salary) >= 120000)
-        except:
-            print('could not parse salary value was: {0}'.format(salary))
-            return(False)
-    elif 'month' in salary:
-        min_salary = re.search(r'\$([0-9]+,[0-9]+)', salary).group(1).replace(',', '')
-        return(int(min_salary) * 12 >= 120000)
-    elif 'hour' in salary:
-        try:
-            min_salary = re.search(r'\$([0-9]+\.[0-9]+)', salary).group(1).replace('.', '')
-        except:
-            min_salary = re.search(r'\$([0-9]+)', salary).group(1).replace('.', '')
-        return((float(min_salary) * 40 * 52) >= 120000)
-    else:
+    currency_regex = r'[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?'
+    try:
+        if salary == 'nothing found' or salary == 'Nothing_found':
+            return True
+        elif 'year' in salary:
+            min_salary = re.search(currency_regex, salary).group(0).replace(',', '')
+            return int(float(min_salary)) >= 120000
+        elif 'month' in salary:
+            min_salary = re.search(currency_regex, salary).group(0).replace(',', '')
+            return int(float(min_salary)) * 12 >= 120000
+        elif 'hour' in salary:
+            min_salary = re.search(currency_regex, salary).group(0)
+            return float(min_salary) * 40 * 52 >= 120000
+        else:
+            raise ValueError("Salary Parsing Error")
+    except:
         print('could not parse salary value was: {0}'.format(salary))
-        return(False)
-
+        return False
 
 def summary_score(summary):
     """
@@ -59,14 +58,13 @@ def summary_score(summary):
     # keep these all lowercase
     good_words = ['tax', 'international', 'corporate', 'law', 'attorney',
                   'LLM', 'planning']
-    bad_words = ['preparation', 'gift tax', 'estates', 'cpa', 'controller']
-
+    bad_words = ['preparation', 'gift', 'estates', 'cpa', 'controller']
     for word in summary_no_stop:
         if word in good_words:
             score += 1
         elif word in bad_words:
             score -= 1
-    return(score)
+    return score
 
 
 def title_score(title):
@@ -82,7 +80,7 @@ def title_score(title):
         score += 2
     else:
         score -= 2
-    return(score)
+    return score
 
 
 query_set = [
@@ -98,6 +96,51 @@ job_titles = [
     'tax+associate'
 ]
 
+def indeed_url(job, location, posting_offset):
+    url = 'https://www.indeed.com/jobs?q={0}&l={1}&start={2}&fromage=1'.format(job, location, str(posting_offset))
+    return url 
+
+def parse_posting(page_text):
+    job_listings = []
+    soup = BeautifulSoup(page_text, 'lxml')
+    for div in soup.find_all(name='div', attrs={'class': 'row'}):
+        job_post = []
+        job_post.append(str(datetime.now().date()))
+        # grabbing job title
+        for a in div.find_all(name='a', attrs={'data-tn-element': 'jobTitle'}):
+            job_post.append(a['title'])
+        # grabbing company name
+        company = div.find_all(name='span', attrs={'class': 'company'})
+        if len(company) > 0:
+            for b in company:
+                job_post.append(b.text.strip())
+        else:
+            sec_try = div.find_all(name='span', attrs={'class': 'result-link-source'})
+            for span in sec_try:
+                job_post.append(span.text)
+        # grabbing city and state
+        c = div.findAll('span', attrs={'class': 'location'})
+        for span in c:
+            try:
+                job_post.append(re.search(r'(^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*)(, )([A-Z]{2})', span.text).group(1))
+                job_post.append(re.search(r'(^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*)(, )([A-Z]{2})', span.text).group(3))
+            except:
+                job_post.append('No information found')
+                job_post.append('No information found')
+        # grabbing summary text
+        d = div.findAll('span', attrs={'class': 'summary'})
+        for span in d:
+            job_post.append(span.text.strip())
+        # grabbing job URL
+        for link_div in div.find_all(name='a', attrs={'data-tn-element': 'jobTitle'}):
+            job_post.append('www.indeed.com' + link_div['href'])
+        # grabbing salary
+        try:
+            job_post.append(div.find(name='span', attrs={'class':'no-wrap'}).text.strip())
+        except:
+            job_post.append('Nothing_found')
+        job_listings.append(job_post)
+    return(job_listings)
 
 def indeed_search(locations, job_titles):
     '''
@@ -120,11 +163,13 @@ def indeed_search(locations, job_titles):
         for query in query_set:
             for start in range(0, max_results_per_city, 10):
                 try:
-                    page = requests.get('https://www.indeed.com/jobs?q={0}&l={1}&start={2}&fromage=1'.format(job, str(query), str(start)))
+                    page = requests.get(indeed_url(job, query, str(start)))
                 except requests.exceptions.ConnectionError:
                     print('~~~~~connection refused sleeping for a bit longer~~~~~~~')
                     time.sleep(15)
                 time.sleep(3)  # ensuring at least 3 seconds between page requests
+               
+                #this can be it's own function.  I Wrote the function above to accept the page.text
                 soup = BeautifulSoup(page.text, 'lxml')
                 for div in soup.find_all(name='div', attrs={'class': 'row'}):
                     job_post = []
@@ -178,13 +223,13 @@ def indeed_search(locations, job_titles):
                         pass
     end_time = datetime.now()
     print('Web scraping took {0}'.format(end_time - start_time))
-    return(job_listings)
+    return job_listings
 
 
 def filter_found_jobs(job_results):
     '''
     Takes queried job results dataframe from indeed job search and
-    filters out the results to a more managable size
+    filters out the results to a more manageable size
     '''
     # Selection of companies and job titles that are not relevant
     bad_titles = [
@@ -239,7 +284,7 @@ def filter_found_jobs(job_results):
     unscored_jobs_df.loc[:, 'score'] += unscored_jobs_df.job_title.apply(title_score)
     filtered_jobs = unscored_jobs_df[unscored_jobs_df.score > 2].sort_values('score', ascending=False)
 
-    print('Creating log, {} jobs found'.format(len(filtered_jobs)))
+    print('{0} jobs found'.format(len(filtered_jobs)))
     return(filtered_jobs)
 
 
@@ -248,7 +293,7 @@ def update_google_sheets(jobs):
     job_listings = jobs.values.tolist()
     print("{0} jobs found, starting upload to Google sheet.".format(len(job_listings)))
     dir_path = os.path.dirname(os.path.abspath(__file__))
-    gc = pygsheets.authorize(service_file=os.path.join(dir_path, 'client_secret.json'), no_cache=True)
+    gc = pygsheets.authorize(service_file=os.path.join(dir_path, 'jobsheet-auth.json'), no_cache=True)
     # Open spreadsheet and then worksheet
     sh = gc.open('Indeed Job Sheet')
     wks = sh.worksheet_by_title('Job Posts')
