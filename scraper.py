@@ -17,9 +17,40 @@ import pygsheets
 import gmail_sender as email
 import private  # file with private information
 
-import pdb
 
 # ### Helper Methods ###
+def pay_interval(payment_phrase):
+    """Find first match of pay interval key word"""
+    interval_exp = '(?P<interval>hour|day|week|biweek|month|year|annual)'
+    match = re.search(interval_exp, payment_phrase.lower())
+    if match:
+        interval = match.group('interval')
+    else:
+        interval = 'not_found'
+
+    return interval
+
+def calculate_salary(rate, interval):
+    ann_salary = None
+    try:
+        rate = int(rate)
+    except:
+        return False
+
+    if interval == 'hour':
+        ann_salary = rate * 8 * 5 * 52
+    elif interval == 'week':
+        ann_salary = rate * 52
+    elif interval == 'biweek':
+        ann_salary = rate * 26
+    elif interval == 'month':
+        ann_salary = rate * 12
+    elif interval == 'year' or  interval == 'annual':
+        ann_salary = rate
+    else:
+        ann_salary = 'not_found'
+
+    return ann_salary
 
 def salary_sufficient(salary):
     """
