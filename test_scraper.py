@@ -31,12 +31,33 @@ class TestAnnualSalary:
             ('200', 'week', 10400),
             ('800', 'biweek', 20800),
             ('3000', 'month', 36000),
-            ('75000', 'year', 75000)
+            ('75000', 'year', 75000),
+            ('smile', 'year', 'Could not calculate salary')
             ]
         )
     def test_convery_anual_salary(self, rate, interval, expected):
        salary =  scraper.calculate_salary(rate, interval)
        assert salary == expected
+class TestGetRate:
+
+    @pytest.mark.parametrize('string, expected',[
+        ('$120,001 per year', '120001'),
+        ('$99,999 per year', '99999' ),
+        ('120001.01 per year', '120001.01'),
+        ('99999.93 per year', '99999.93'),
+        ('$10,001 per month', '10001'),
+        ('$9,999 per month', '9999'),
+        ('12,000 per month', '12000'),
+        ('99.93 per month', '99.93'),
+        ('$57.70 per hour', '57.70'),
+        ('38 per hour', '38'),
+        ('75 per hour', '75'),
+        ('9.93 per hour', '9.93'),
+        ('$25 - $40 an hour', '25')
+        ]
+    )
+    def test_parse_rate_string(self, string, expected):
+        assert scraper.get_rate(string) == expected
 
 # ### salary_sufficient
 @pytest.mark.parametrize(

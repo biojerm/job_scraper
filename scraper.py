@@ -35,7 +35,7 @@ def calculate_salary(rate, interval):
     try:
         rate = int(rate)
     except:
-        return False
+        return 'Could not calculate salary'
 
     if interval == 'hour':
         ann_salary = rate * 8 * 5 * 52
@@ -51,6 +51,14 @@ def calculate_salary(rate, interval):
         ann_salary = 'not_found'
 
     return ann_salary
+
+def get_rate(string):
+    currency_regex = (r"[+-]?[0-9]{1,3}(?:[0-9]*"
+        "(?:[.,][0-9]{2})?|(?:,[0-9]{3})*"
+        "(?:.[0-9]{2})?|(?:.[0-9]{3})*"
+        "(?:,[0-9]{2})?)")
+    rate = re.search(currency_regex, string.replace(',','')).group(0)
+    return rate
 
 def salary_sufficient(salary):
     """
