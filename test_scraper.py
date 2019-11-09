@@ -19,9 +19,9 @@ class TestPayInterval:
         assert interval == result
 
     def test_no_match(self):
-        phrase = 'foo'
-        interval = scraper.pay_interval(phrase)
-        assert interval == 'not_found'
+        with pytest.raises(ValueError):
+            phrase = 'foo'
+            scraper.pay_interval(phrase)
 
 class TestAnnualSalary:
 
@@ -32,12 +32,22 @@ class TestAnnualSalary:
             ('800', 'biweek', 20800),
             ('3000', 'month', 36000),
             ('75000', 'year', 75000),
-            ('smile', 'year', 'Could not calculate salary')
             ]
         )
     def test_convery_anual_salary(self, rate, interval, expected):
-       salary =  scraper.calculate_salary(rate, interval)
+       salary = scraper.calculate_salary(rate, interval)
        assert salary == expected
+
+
+    def test_rate_not_intger(self):
+        with pytest.raises(ValueError):
+            scraper.calculate_salary('foo', 'year')
+
+    def test_no_salary_matches(self):
+        with pytest.raises(ValueError):
+            scraper.calculate_salary('foo', 'year')
+
+
 class TestGetRate:
 
     @pytest.mark.parametrize('string, expected',[
@@ -59,16 +69,20 @@ class TestGetRate:
     def test_parse_rate_string(self, string, expected):
         assert scraper.get_rate(string) == expected
 
+    def test_no_rate_found(self):
+        with pytest.raises(ValueError):
+            scraper.get_rate('foo')
+
 # ### salary_sufficient
 @pytest.mark.parametrize(
     'salary, sufficient_status',[
-     ('nothing found', True),
+     # ('nothing found', True),
      ('Nothing_found', True),
      ('Anything else', False)
      ]
 )
 def test_salary_sufficient_when_nothing_found(salary,sufficient_status):
-    assert scraper.salary_sufficient(salary) == sufficient_status
+    assert scraper.salary_sufficient(salary, 120000) == sufficient_status
 
 @pytest.mark.parametrize('salary, sufficient_status',[
     ('$120,001 per year', True),
@@ -83,22 +97,12 @@ def test_salary_sufficient_when_nothing_found(salary,sufficient_status):
     ('38 per hour', False),
     ('75 per hour', True),
     ('9.93 per hour', False),
-    ('$25 - $40 an hour', False)
-    ]
-)
+    ('$25 - $40 an hour', False),
+    ('$one billion per year', False),
+    ('not real numbers per year', False)
+    ])
 def test_annual_salary_greater_120000(salary, sufficient_status):
-    assert scraper.salary_sufficient(salary) == sufficient_status
-
-@pytest.mark.parametrize('salary',[
-    ('$one billion per year'),
-    ('not real numbers per year')
-    ]
-)
-def test_if_annual_salary_cannot_be_parsed(salary, capsys):
-    scraper.salary_sufficient(salary)
-    captured = capsys.readouterr()
-    assert captured.out == 'could not parse salary value was: {0}\n'.format(salary)
-
+    assert scraper.salary_sufficient(salary, 120000) == sufficient_status
 
 # ### summary_score
 def test_summary_scoring():

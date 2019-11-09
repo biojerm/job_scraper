@@ -26,16 +26,17 @@ def pay_interval(payment_phrase):
     if match:
         interval = match.group('interval')
     else:
-        interval = 'not_found'
+        print(f'Could not find payment interval in {payment_phrase}')
+        raise ValueError
 
     return interval
 
 def calculate_salary(rate, interval):
     ann_salary = None
     try:
-        rate = int(rate)
+        rate = float(rate)
     except:
-        return 'Could not calculate salary'
+        raise ValueError
 
     if interval == 'hour':
         ann_salary = rate * 8 * 5 * 52
@@ -48,41 +49,40 @@ def calculate_salary(rate, interval):
     elif interval == 'year' or  interval == 'annual':
         ann_salary = rate
     else:
-        ann_salary = 'not_found'
+        raise ValueError
 
     return ann_salary
 
 def get_rate(string):
-    currency_regex = (r"[+-]?[0-9]{1,3}(?:[0-9]*"
-        "(?:[.,][0-9]{2})?|(?:,[0-9]{3})*"
-        "(?:.[0-9]{2})?|(?:.[0-9]{3})*"
-        "(?:,[0-9]{2})?)")
-    rate = re.search(currency_regex, string.replace(',','')).group(0)
-    return rate
+    currency_regex = r'\d+(\.\d+)?'
+    rate = False
+    match = re.search(currency_regex, string.replace(',',''))
+    if not match:
+        raise ValueError
 
-def salary_sufficient(salary):
+    return match.group(0)
+
+def salary_sufficient(comp_stmnt, suff_salary):
     """
     Salary can be found in a number of different formats (annual, hourly,
         monthly)
     """
-    currency_regex = r'[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?'
+    sufficient = False
+    if comp_stmnt == 'Nothing_found':
+        return True
     try:
-        if salary == 'nothing found' or salary == 'Nothing_found':
-            return True
-        elif 'year' in salary:
-            min_salary = re.search(currency_regex, salary).group(0).replace(',', '')
-            return int(float(min_salary)) >= 120000
-        elif 'month' in salary:
-            min_salary = re.search(currency_regex, salary).group(0).replace(',', '')
-            return int(float(min_salary)) * 12 >= 120000
-        elif 'hour' in salary:
-            min_salary = re.search(currency_regex, salary).group(0)
-            return float(min_salary) * 40 * 52 >= 120000
-        else:
-            raise ValueError("Salary Parsing Error")
-    except:
-        print('could not parse salary value was: {0}'.format(salary))
-        return False
+        rate_str = get_rate(comp_stmnt)
+        interval = pay_interval(comp_stmnt)
+        if rate_str and interval:
+            rate = calculate_salary(rate_str, interval)
+            # import pdb; pdb.set_trace()
+            if rate >= suff_salary:
+                sufficient = True
+    except ValueError:
+        print(f'Could not parse salary value was: {comp_stmnt}')
+        sufficient = False
+
+    return sufficient
 
 def summary_score(summary):
     """
