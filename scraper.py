@@ -64,7 +64,12 @@ def calculate_salary(rate: str, interval: str) -> int:
     return ann_salary
 
 def get_rate(string: str) -> str:
-    """Parse sting for pay rate"""
+    """Parse sting for pay rate
+
+    string: string representations of pay test_parse_rate_string
+
+    raises: ValueError:If cannot find numeric pay rate
+    """
     currency_regex = r'\d+(\.\d+)?'
     match = re.search(currency_regex, string.replace(',', ''))
     if not match:
@@ -72,8 +77,12 @@ def get_rate(string: str) -> str:
 
     return match.group(0)
 
-def salary_sufficient(comp_stmnt: str, suff_salary: str) -> bool:
-    """Evaluates if annual salary is sufficient amount"""
+def salary_sufficient(comp_stmnt: str, suff_salary: int) -> bool:
+    """Evaluates if annual salary is sufficient amount
+
+    comp_stmnt: string with pay rate and interval
+    sufficient_status: required salary for position
+    """
     sufficient = False
     if comp_stmnt == 'Nothing_found':
         return True
