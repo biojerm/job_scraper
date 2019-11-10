@@ -19,8 +19,13 @@ import private  # file with private information
 
 
 # ### Helper Methods ###
-def pay_interval(payment_phrase):
-    """Find first match of pay interval key word"""
+def pay_interval(payment_phrase: str) -> str:
+    """Find first match of pay interval key word
+
+    payment_phrase: text containg pay interval information:
+
+    raises: ValueError if cannot find a payment interval insde payment_phrase
+    """
     interval_exp = '(?P<interval>hour|day|week|biweek|month|year|annual)'
     match = re.search(interval_exp, payment_phrase.lower())
     if match:
@@ -31,7 +36,12 @@ def pay_interval(payment_phrase):
 
     return interval
 
-def calculate_salary(rate, interval):
+def calculate_salary(rate: str, interval: str) -> int:
+    """Converts pay rate to annual salary
+
+    raises: ValueError if rate cannot be cast to float
+            ValueError if no known interval value
+    """
     ann_salary = None
     try:
         rate = float(rate)
@@ -46,27 +56,24 @@ def calculate_salary(rate, interval):
         ann_salary = rate * 26
     elif interval == 'month':
         ann_salary = rate * 12
-    elif interval == 'year' or  interval == 'annual':
+    elif interval in {'year', 'annual'}:
         ann_salary = rate
     else:
         raise ValueError
 
     return ann_salary
 
-def get_rate(string):
+def get_rate(string: str) -> str:
+    """Parse sting for pay rate"""
     currency_regex = r'\d+(\.\d+)?'
-    rate = False
-    match = re.search(currency_regex, string.replace(',',''))
+    match = re.search(currency_regex, string.replace(',', ''))
     if not match:
         raise ValueError
 
     return match.group(0)
 
-def salary_sufficient(comp_stmnt, suff_salary):
-    """
-    Salary can be found in a number of different formats (annual, hourly,
-        monthly)
-    """
+def salary_sufficient(comp_stmnt: str, suff_salary: str) -> bool:
+    """Evaluates if annual salary is sufficient amount"""
     sufficient = False
     if comp_stmnt == 'Nothing_found':
         return True
