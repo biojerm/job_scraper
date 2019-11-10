@@ -50,3 +50,5 @@ client_secret_2.json
 *.ipynb
 private.*
 private.py
+*.swp
+.ycm*

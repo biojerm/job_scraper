@@ -137,7 +137,7 @@ job_titles = [
 
 def indeed_url(job, location, posting_offset):
     url = 'https://www.indeed.com/jobs?q={0}&l={1}&start={2}&fromage=1'.format(job, location, str(posting_offset))
-    return url 
+    return url
 
 def parse_posting(page_text):
     job_listings = []
