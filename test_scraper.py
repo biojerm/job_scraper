@@ -106,7 +106,9 @@ def test_annual_salary_greater_120000(salary, sufficient_status):
 
 # ### summary_score
 def test_summary_scoring():
-    assert scraper.summary_score('Corporate tax company looking for attorney.  Will calculate gift tax') == 3
+    summary = ("Corporate tax company looking for attorney."
+               " Will calculate gift tax")
+    assert scraper.summary_score(summary) == 3
 
 
 # Title_score
@@ -117,7 +119,7 @@ def test_summary_scoring():
 						('random position tax', 2)
 ])
 def test_job_title_scoring(title,score):
-	assert scraper.title_score(title) == score
+    assert scraper.title_score(title) == score
 
 
 def test_indeed_url():
