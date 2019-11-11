@@ -3,8 +3,8 @@
 from datetime import datetime
 import os
 import re
-import requests
 import time
+import requests
 
 from bs4 import BeautifulSoup
 from nltk.tokenize import word_tokenize
@@ -108,12 +108,11 @@ def summary_score(summary):
     stop_words = set(stopwords.words('english'))
     score = 0
     tokenized_summary = word_tokenize(summary.lower())
-    summary_no_stop = [token for token in tokenized_summary if token not in stop_words]
-
+    summary_no_stop = filter(lambda x: x not in stop_words, tokenized_summary)
     # keep these all lowercase
-    good_words = ['tax', 'international', 'corporate', 'law', 'attorney',
-                  'LLM', 'planning']
-    bad_words = ['preparation', 'gift', 'estates', 'cpa', 'controller']
+    good_words = {'tax', 'international', 'corporate', 'law', 'attorney',
+                  'LLM', 'planning'}
+    bad_words = {'preparation', 'gift', 'estates', 'cpa', 'controller'}
     for word in summary_no_stop:
         if word in good_words:
             score += 1
