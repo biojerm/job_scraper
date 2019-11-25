@@ -5,6 +5,7 @@ import os
 import re
 import time
 import requests
+import itertools
 
 from bs4 import BeautifulSoup
 from nltk.tokenize import word_tokenize
@@ -151,8 +152,30 @@ job_titles = [
 ]
 
 def indeed_url(job, location, posting_offset):
-    url = 'https://www.indeed.com/jobs?q={0}&l={1}&start={2}&fromage=1'.format(job, location, str(posting_offset))
+    """Returns Indeed.com API url for job query
+
+    Args:
+        job (str): Title of job
+        location (str): Location of job
+        posting_offset (str): Index of first posting
+
+    Return (str): Indeed url
+    """
+    url = (f"https://www.indeed.com/jobs"
+           f"?q={job}&l={location}&start={str(posting_offset)}&fromage=1'")
     return url
+
+
+class JobPost:
+    def __init__(self, html_soup):
+        self.listing = html_soup
+        self.current_date = str(datetime.now().date())
+
+    def _job_title(self):
+        title = self.listing.find_all(name='a',
+                                    attrs={'data-tn-element': 'jobTitle'}
+                                    )
+        return title
 
 def parse_posting(page_text):
     job_listings = []
@@ -204,79 +227,76 @@ def indeed_search(locations, job_titles):
     query_set = locations
     max_results_per_city = 20
     columns = [
-        'capture_date', 'job_title', 'company_name', 'city', 'state', 'summary',
-        'link', 'salary'
+        'capture_date', 'job_title', 'company_name',
+        'city', 'state', 'summary', 'link', 'salary'
     ]
     job_listings = pd.DataFrame(columns=columns)
 
     # Web scraping code:
-    start_time = datetime.now()
-    print('Started collecting jobs at {}'.format(datetime.now().strftime('%I:%M %p')))
-    for job in job_titles:
-        print("Searching the locations for the positions with the title of: {}".format(job))
-        for query in query_set:
-            for start in range(0, max_results_per_city, 10):
+    jobs_per_page = range(0, max_results_per_city, 10)
+    query_keys = itertools.product(job_titles, query_set, jobs_per_page)
+    for key_tup in query_keys:
+        (job, query, start) = key_tup
+        try:
+            page = requests.get(indeed_url(job, query, str(start)))
+        except requests.exceptions.ConnectionError:
+            print('~~~~~connection refused sleeping for a bit longer~~~~~~~')
+            time.sleep(15)
+        time.sleep(3)  # ensuring at least 3 seconds between page requests
+
+        #this can be it's own function.  I Wrote the function above to accept the page.text
+        soup = BeautifulSoup(page.text, 'lxml')
+        for div in soup.find_all(name='div', attrs={'class': 'row'}):
+            job_post = []
+            job_post.append(str(datetime.now().date()))
+            # grabbing job title
+            for a in div.find_all(name='a', attrs={'data-tn-element': 'jobTitle'}):
+                job_post.append(a['title'])
+            # grabbing company name
+            company = div.find_all(name='span', attrs={'class': 'company'})
+            if len(company) > 0:
+                for b in company:
+                    job_post.append(b.text.strip())
+            else:
+                sec_try = div.find_all(name='span', attrs={'class': 'result-link-source'})
+                for span in sec_try:
+                    job_post.append(span.text)
+            # grabbing city and state
+            c = div.findAll('span', attrs={'class': 'location'})
+            for span in c:
                 try:
-                    page = requests.get(indeed_url(job, query, str(start)))
-                except requests.exceptions.ConnectionError:
-                    print('~~~~~connection refused sleeping for a bit longer~~~~~~~')
-                    time.sleep(15)
-                time.sleep(3)  # ensuring at least 3 seconds between page requests
-               
-                #this can be it's own function.  I Wrote the function above to accept the page.text
-                soup = BeautifulSoup(page.text, 'lxml')
-                for div in soup.find_all(name='div', attrs={'class': 'row'}):
-                    job_post = []
-                    job_post.append(str(datetime.now().date()))
-                    # grabbing job title
-                    for a in div.find_all(name='a', attrs={'data-tn-element': 'jobTitle'}):
-                        job_post.append(a['title'])
-                    # grabbing company name
-                    company = div.find_all(name='span', attrs={'class': 'company'})
-                    if len(company) > 0:
-                        for b in company:
-                            job_post.append(b.text.strip())
-                    else:
-                        sec_try = div.find_all(name='span', attrs={'class': 'result-link-source'})
-                        for span in sec_try:
-                            job_post.append(span.text)
-                    # grabbing city and state
-                    c = div.findAll('span', attrs={'class': 'location'})
-                    for span in c:
-                        try:
-                            job_post.append(re.search(r'(^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*)(, )([A-Z]{2})', span.text).group(1))
-                            job_post.append(re.search(r'(^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*)(, )([A-Z]{2})', span.text).group(3))
-                        except:
-                            job_post.append('No information found')
-                            job_post.append('No information found')
-                    # grabbing summary text
-                    d = div.findAll('span', attrs={'class': 'summary'})
-                    for span in d:
-                        job_post.append(span.text.strip())
-                    # grabbing job URL
-                    for link_div in div.find_all(name='a', attrs={'data-tn-element': 'jobTitle'}):
-                        job_post.append('www.indeed.com' + link_div['href'])
-                    # grabbing salary
-                    try:
-                        job_post.append(div.find('nobr').text)
-                    except:
-                        try:
-                            div_two = div.find(name='div', attrs={'class': 'sjcl'})
-                            div_three = div_two.find('div')
-                            job_post.append(div_three.text.strip())
-                        except:
-                            job_post.append('Nothing_found')
-                    try:
-                        job_posting = pd.DataFrame([job_post], columns=columns)
-                        job_listings = job_listings.append(job_posting)
-                        # print(job_post[1]) #print the titles of the jobs being found
-                    except (ValueError, AssertionError) as e:
-                        print('An error occurred, it was: {}'.format(e))
-                        print('https://www.indeed.com/jobs?q={0}&l={1}&start={2}&fromage=1'.format(job, str(query), str(start)))
-                        # print(job_post)
-                        pass
+                    job_post.append(re.search(r'(^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*)(, )([A-Z]{2})', span.text).group(1))
+                    job_post.append(re.search(r'(^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*)(, )([A-Z]{2})', span.text).group(3))
+                except:
+                    job_post.append('No information found')
+                    job_post.append('No information found')
+            # grabbing summary text
+            d = div.findAll('span', attrs={'class': 'summary'})
+            for span in d:
+                job_post.append(span.text.strip())
+            # grabbing job URL
+            for link_div in div.find_all(name='a', attrs={'data-tn-element': 'jobTitle'}):
+                job_post.append('www.indeed.com' + link_div['href'])
+            # grabbing salary
+            try:
+                job_post.append(div.find('nobr').text)
+            except:
+                try:
+                    div_two = div.find(name='div', attrs={'class': 'sjcl'})
+                    div_three = div_two.find('div')
+                    job_post.append(div_three.text.strip())
+                except:
+                    job_post.append('Nothing_found')
+            try:
+                job_posting = pd.DataFrame([job_post], columns=columns)
+                job_listings = job_listings.append(job_posting)
+                # print(job_post[1]) #print the titles of the jobs being found
+            except (ValueError, AssertionError) as e:
+                print('An error occurred, it was: {}'.format(e))
+                print('https://www.indeed.com/jobs?q={0}&l={1}&start={2}&fromage=1'.format(job, str(query), str(start)))
+                # print(job_post)
+                pass
     end_time = datetime.now()
-    print('Web scraping took {0}'.format(end_time - start_time))
     return job_listings
 
 
