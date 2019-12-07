@@ -171,11 +171,37 @@ class JobPost:
         self.listing = html_soup
         self.current_date = str(datetime.now().date())
 
+
     def _job_title(self):
-        title = self.listing.find_all(name='a',
-                                    attrs={'data-tn-element': 'jobTitle'}
-                                    )
+        title_element = self.listing.find_all(name='a',
+                                              attrs={'data-tn-element':
+                                                     'jobTitle'})
+        title = title_element.pop().text.strip()
+
         return title
+
+
+    def _company_name(self):
+        company_element = self.listing.find_all(name='span',
+                                                attrs={'class': 'company'})
+        company = ''
+        if company_element:
+            company = company_element.pop().text.strip()
+
+        return company
+
+
+    def _city_and_state(self):
+        pass
+
+    def _summary_text(self):
+        pass
+
+    def _job_url(self):
+        pass
+
+    def _salary(self):
+        pass
 
 def parse_posting(page_text):
     job_listings = []
@@ -189,8 +215,7 @@ def parse_posting(page_text):
         # grabbing company name
         company = div.find_all(name='span', attrs={'class': 'company'})
         if len(company) > 0:
-            for b in company:
-                job_post.append(b.text.strip())
+            job_post.append(company.pop().text.strip())
         else:
             sec_try = div.find_all(name='span', attrs={'class': 'result-link-source'})
             for span in sec_try:

@@ -1,6 +1,7 @@
 from datetime import datetime
-import scraper
 import pytest
+from bs4 import BeautifulSoup
+import scraper
 
 
 
@@ -113,41 +114,59 @@ def test_summary_scoring():
 
 # Title_score
 @pytest.mark.parametrize('title, score', [
-						('Sr Tax manager', 2),
-						('tax planner', 2),
-						('Real Estate Planner', -2),
-						('random position tax', 2)
+                        ('Sr Tax manager', 2),
+                        ('tax planner', 2),
+                        ('Real Estate Planner', -2),
+                        ('random position tax', 2)
 ])
 def test_job_title_scoring(title,score):
     assert scraper.title_score(title) == score
 
 
 def test_indeed_url():
-	job = 'Mechanic'
-	location = 'California'
-	posting_offset = 0
-	test_url = scraper.indeed_url(job, location, posting_offset)
-	assert test_url == 'https://www.indeed.com/jobs?q=Mechanic&l=California&start=0&fromage=1'
+    job = 'Mechanic'
+    location = 'California'
+    posting_offset = 0
+    test_url = scraper.indeed_url(job, location, posting_offset)
+    assert test_url == 'https://www.indeed.com/jobs?q=Mechanic&l=California&start=0&fromage=1'
 
 
 @pytest.fixture(scope='module')
 def job_listings():
-	with open(r"helpers/page.html","r") as page:
-		return page.read()
+    with open(r"helpers/page.html","r") as page:
+        return page.read()
 
 def test_parse_posting(job_listings):
-	job_details = scraper.parse_posting(job_listings)
-	assert len(job_details) == 15, 'Should have 15 job postings'
-	assert job_details[-1][0] == str(datetime.now().date()), 'First element is the date'
-	assert job_details[-1][1] == 'Tax accounting assistant/Bookkeeper', 'Second element is the job title'
-	assert job_details[-1][2] == 'Bennet Shay CPAs', 'Third element is the company name'
-	assert job_details[-1][3] == 'Santa Clara', 'Fourth element is the city'
-	assert job_details[-1][4] == 'CA', 'Fifth element is the State' # or love ;)
-	assert job_details[-1][5] == 'Create estimate tax envelopes and tax filings. Tax Assistant – 45%. File annual property tax reports. Data entry of client tax documents....', 'Sixth element is a summary of the job'
-	assert job_details[-1][6] == 'www.indeed.com/pagead/clk?mo=r&ad=-6NYlbfkN0AnFnp7dmWfQ3fR6EGyjMo1ArRAXIGEJnVLL94bXtaM9tTCmkH5jcm3mrgBiBE8efeWahpkqcYEIe86fy_D_iOyBR30XTByePKyter7098zmkga8PZHFT0AD45QdCPD_HyAFO3Wbaq-HFHacunYXRmbMgxYdCa1-LpWN1x8USld0eHT6LfEsuP6frsqEEDbY6qDtrc4ahyR0NSuSRRQLjcaS-h5soioNE0wNw4Ids0BhZwKw_5BFvuVopGSrf7n3gF1dw5065UHTbTgIN7MHaPbsYs6tIz93RiT-RpaNDdIgU8NGMrdKSrPAvT7L7PuDUxKxHgFZ9OrY2cDDEDfMP66_xIsoSt3176Zt3hQiKb7j5hHZ4Kn8CtKwEWJEFN5pIuCSGiGzfnV8xFZR7wHhxnUJ00WtodjaD10q5CmIz56vaz34fX2j7ksodNW4bNGx2k=&vjs=3&p=5&sk=&fvj=1', 'Seventh element is the URL of the job'
-	assert job_details[-1][7] == '$17 - $20 an hour'
+    job_details = scraper.parse_posting(job_listings)
+    assert len(job_details) == 15, 'Should have 15 job postings'
+    assert job_details[-1][0] == str(datetime.now().date()), 'First element is the date'
+    assert job_details[-1][1] == 'Tax accounting assistant/Bookkeeper', 'Second element is the job title'
+    assert job_details[-1][2] == 'Bennet Shay CPAs', 'Third element is the company name'
+    assert job_details[-1][3] == 'Santa Clara', 'Fourth element is the city'
+    assert job_details[-1][4] == 'CA', 'Fifth element is the State' # or love ;)
+    assert job_details[-1][5] == 'Create estimate tax envelopes and tax filings. Tax Assistant – 45%. File annual property tax reports. Data entry of client tax documents....', 'Sixth element is a summary of the job'
+    assert job_details[-1][6] == 'www.indeed.com/pagead/clk?mo=r&ad=-6NYlbfkN0AnFnp7dmWfQ3fR6EGyjMo1ArRAXIGEJnVLL94bXtaM9tTCmkH5jcm3mrgBiBE8efeWahpkqcYEIe86fy_D_iOyBR30XTByePKyter7098zmkga8PZHFT0AD45QdCPD_HyAFO3Wbaq-HFHacunYXRmbMgxYdCa1-LpWN1x8USld0eHT6LfEsuP6frsqEEDbY6qDtrc4ahyR0NSuSRRQLjcaS-h5soioNE0wNw4Ids0BhZwKw_5BFvuVopGSrf7n3gF1dw5065UHTbTgIN7MHaPbsYs6tIz93RiT-RpaNDdIgU8NGMrdKSrPAvT7L7PuDUxKxHgFZ9OrY2cDDEDfMP66_xIsoSt3176Zt3hQiKb7j5hHZ4Kn8CtKwEWJEFN5pIuCSGiGzfnV8xFZR7wHhxnUJ00WtodjaD10q5CmIz56vaz34fX2j7ksodNW4bNGx2k=&vjs=3&p=5&sk=&fvj=1', 'Seventh element is the URL of the job'
+    assert job_details[-1][7] == '$17 - $20 an hour'
 
 
+class TestJobPost:
+
+    @pytest.fixture(scope='class')
+    def page_soup(self, job_listings):
+        soup = BeautifulSoup(job_listings, 'lxml')
+        return soup
+
+
+    def test_job_title(self, page_soup):
+        post = scraper.JobPost(page_soup)
+        job_title = post._job_title()
+        assert job_title == 'Tax accounting assistant/Bookkeeper'
+
+
+    def test_company_name_present(self, page_soup):
+        post = scraper.JobPost(page_soup)
+        company_name = post._company_name()
+        assert company_name == 'Bennet Shay CPAs'
 
 # indeed_search
 
