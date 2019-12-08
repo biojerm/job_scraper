@@ -175,6 +175,19 @@ class TestJobPost:
         city, state = post._location()
         assert city == 'Santa Clara'
         assert state == 'CA'
+
+    def test_summary_text(self, page_soup):
+        post = scraper.JobPost(page_soup)
+        summary = post._summary_text()
+        expected_summary = ("Create estimate tax envelopes "
+                            "and tax filings. Tax Assistant – "
+                            "45%. File annual property tax "
+                            "reports. Data entry of client tax "
+                            "documents...."
+                            )
+        assert summary == expected_summary
+
+
 # indeed_search
 
 # things to test:

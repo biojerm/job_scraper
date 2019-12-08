@@ -203,14 +203,23 @@ class JobPost:
             location_re = re.compile(r"(^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*)"
                                      "(, )([A-Z]{2})")
             match = location_re.search(location_element.text.strip())
-            city = match.group(1)
-            state = match.group(3)
+            try:
+                city = match.group(1)
+                state = match.group(3)
+            except AttributeError:
+                city = "No information found"
+                state = "No information found"
 
         return city, state
 
 
     def _summary_text(self):
-        pass
+        summary_element = self.listing.find('span', attrs={'class': 'summary'})
+        summary = ''
+        if summary_element:
+            summary = summary_element.text.strip()
+
+        return summary
 
     def _job_url(self):
         pass
