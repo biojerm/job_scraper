@@ -187,6 +187,28 @@ class TestJobPost:
                             )
         assert summary == expected_summary
 
+    def test_job_url(self, page_soup):
+        post = scraper.JobPost(page_soup)
+        expected_url = ("www.indeed.com/pagead/clk?mo=r&ad=-6NYlbfkN"
+                       "0AnFnp7dmWfQ3fR6EGyjMo1ArRAXIGEJnVLL94bXtaM"
+                       "9tTCmkH5jcm3mrgBiBE8efeWahpkqcYEIe86fy_D_iO"
+                       "yBR30XTByePKyter7098zmkga8PZHFT0AD45QdCPD_H"
+                       "yAFO3Wbaq-HFHacunYXRmbMgxYdCa1-LpWN1x8USld0"
+                       "eHT6LfEsuP6frsqEEDbY6qDtrc4ahyR0NSuSRRQLjca"
+                       "S-h5soioNE0wNw4Ids0BhZwKw_5BFvuVopGSrf7n3gF"
+                       "1dw5065UHTbTgIN7MHaPbsYs6tIz93RiT-RpaNDdIgU"
+                       "8NGMrdKSrPAvT7L7PuDUxKxHgFZ9OrY2cDDEDfMP66_"
+                       "xIsoSt3176Zt3hQiKb7j5hHZ4Kn8CtKwEWJEFN5pIuC"
+                       "SGiGzfnV8xFZR7wHhxnUJ00WtodjaD10q5CmIz56vaz"
+                       "34fX2j7ksodNW4bNGx2k=&vjs=3&p=5&sk=&fvj=1")
+        url = post._job_url()
+        assert url == expected_url
+
+
+    def test_salary(self, page_soup):
+        post = scraper.JobPost(page_soup)
+        salary = post._salary()
+        assert salary == "$17 - $20 an hour"
 
 # indeed_search
 

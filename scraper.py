@@ -196,7 +196,7 @@ class JobPost:
     def _location(self):
 
         location_element = self.listing.find('span',
-                                                attrs={'class': 'location'})
+                                             attrs={'class': 'location'})
         city = ''
         state = ''
         if location_element:
@@ -222,10 +222,22 @@ class JobPost:
         return summary
 
     def _job_url(self):
-        pass
+        url_element = self.listing.find(name='a',
+                                        attrs={'data-tn-element': 'jobTitle'})
+        url = f"www.indeed.com{url_element['href']}"
+        return url
 
     def _salary(self):
-        pass
+        salary_element = self.listing.find(name='span',
+                                           attrs={'class':'no-wrap'})
+        salary = ''
+        if salary_element:
+            salary = salary_element.text.strip()
+        else:
+            salary = "Nothing_found"
+
+        return salary
+
 
 def parse_posting(page_text):
     job_listings = []
