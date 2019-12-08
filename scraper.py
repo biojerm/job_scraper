@@ -162,7 +162,7 @@ def indeed_url(job, location, posting_offset):
     Return (str): Indeed url
     """
     url = (f"https://www.indeed.com/jobs"
-           f"?q={job}&l={location}&start={str(posting_offset)}&fromage=1'")
+           f"?q={job}&l={location}&start={str(posting_offset)}&fromage=1")
     return url
 
 
@@ -176,7 +176,9 @@ class JobPost:
         title_element = self.listing.find_all(name='a',
                                               attrs={'data-tn-element':
                                                      'jobTitle'})
-        title = title_element.pop().text.strip()
+        title = ''
+        if title_element:
+            title = title_element.pop().text.strip()
 
         return title
 
@@ -191,8 +193,21 @@ class JobPost:
         return company
 
 
-    def _city_and_state(self):
-        pass
+    def _location(self):
+
+        location_element = self.listing.find('span',
+                                                attrs={'class': 'location'})
+        city = ''
+        state = ''
+        if location_element:
+            location_re = re.compile(r"(^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*)"
+                                     "(, )([A-Z]{2})")
+            match = location_re.search(location_element.text.strip())
+            city = match.group(1)
+            state = match.group(3)
+
+        return city, state
+
 
     def _summary_text(self):
         pass

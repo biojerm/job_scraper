@@ -154,7 +154,8 @@ class TestJobPost:
     @pytest.fixture(scope='class')
     def page_soup(self, job_listings):
         soup = BeautifulSoup(job_listings, 'lxml')
-        return soup
+        jobs = soup.find_all(name='div', attrs={'class': 'row'})
+        return jobs[-1]
 
 
     def test_job_title(self, page_soup):
@@ -168,6 +169,12 @@ class TestJobPost:
         company_name = post._company_name()
         assert company_name == 'Bennet Shay CPAs'
 
+
+    def test_location(self, page_soup):
+        post = scraper.JobPost(page_soup)
+        city, state = post._location()
+        assert city == 'Santa Clara'
+        assert state == 'CA'
 # indeed_search
 
 # things to test:
