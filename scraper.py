@@ -173,22 +173,22 @@ class JobPost:
 
 
     def _job_title(self):
-        title_element = self.listing.find_all(name='a',
+        title_element = self.listing.find(name='a',
                                               attrs={'data-tn-element':
                                                      'jobTitle'})
         title = ''
         if title_element:
-            title = title_element.pop().text.strip()
+            title = title_element.text.strip()
 
         return title
 
 
     def _company_name(self):
-        company_element = self.listing.find_all(name='span',
+        company_element = self.listing.find(name='span',
                                                 attrs={'class': 'company'})
         company = ''
         if company_element:
-            company = company_element.pop().text.strip()
+            company = company_element.text.strip()
 
         return company
 
