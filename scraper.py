@@ -239,6 +239,18 @@ class JobPost:
         return salary
 
 
+    def get_details(self):
+        date = self.current_date
+        job_title = self._job_title()
+        company_name = self._company_name()
+        location = self._location()
+        summary = self._summary_text()
+        url = self._job_url()
+        salary = self._salary()
+
+        return [date, job_title, company_name, location, summary, url, salary]
+
+
 def parse_posting(page_text):
     job_listings = []
     soup = BeautifulSoup(page_text, 'lxml')

@@ -210,6 +210,11 @@ class TestJobPost:
         salary = post._salary()
         assert salary == "$17 - $20 an hour"
 
+
+    def test_get_details(self, page_soup):
+        post = scraper.JobPost(page_soup)
+        details = post.get_details()
+        assert len(details) == 7
 # indeed_search
 
 # things to test:
