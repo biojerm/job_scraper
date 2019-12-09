@@ -243,53 +243,21 @@ class JobPost:
         date = self.current_date
         job_title = self._job_title()
         company_name = self._company_name()
-        location = self._location()
+        city, state = self._location()
         summary = self._summary_text()
         url = self._job_url()
         salary = self._salary()
 
-        return [date, job_title, company_name, location, summary, url, salary]
+        return [date, job_title, company_name, city,
+                state, summary, url, salary]
 
 
 def parse_posting(page_text):
     job_listings = []
     soup = BeautifulSoup(page_text, 'lxml')
     for div in soup.find_all(name='div', attrs={'class': 'row'}):
-        job_post = []
-        job_post.append(str(datetime.now().date()))
-        # grabbing job title
-        for a in div.find_all(name='a', attrs={'data-tn-element': 'jobTitle'}):
-            job_post.append(a['title'])
-        # grabbing company name
-        company = div.find_all(name='span', attrs={'class': 'company'})
-        if len(company) > 0:
-            job_post.append(company.pop().text.strip())
-        else:
-            sec_try = div.find_all(name='span', attrs={'class': 'result-link-source'})
-            for span in sec_try:
-                job_post.append(span.text)
-        # grabbing city and state
-        c = div.findAll('span', attrs={'class': 'location'})
-        for span in c:
-            try:
-                job_post.append(re.search(r'(^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*)(, )([A-Z]{2})', span.text).group(1))
-                job_post.append(re.search(r'(^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*)(, )([A-Z]{2})', span.text).group(3))
-            except:
-                job_post.append('No information found')
-                job_post.append('No information found')
-        # grabbing summary text
-        d = div.findAll('span', attrs={'class': 'summary'})
-        for span in d:
-            job_post.append(span.text.strip())
-        # grabbing job URL
-        for link_div in div.find_all(name='a', attrs={'data-tn-element': 'jobTitle'}):
-            job_post.append('www.indeed.com' + link_div['href'])
-        # grabbing salary
-        try:
-            job_post.append(div.find(name='span', attrs={'class':'no-wrap'}).text.strip())
-        except:
-            job_post.append('Nothing_found')
-        job_listings.append(job_post)
+        job_post = JobPost(div)
+        job_listings.append(job_post.get_details())
     return(job_listings)
 
 def indeed_search(locations, job_titles):

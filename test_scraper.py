@@ -214,7 +214,7 @@ class TestJobPost:
     def test_get_details(self, page_soup):
         post = scraper.JobPost(page_soup)
         details = post.get_details()
-        assert len(details) == 7
+        assert len(details) == 8
 # indeed_search
 
 # things to test:
