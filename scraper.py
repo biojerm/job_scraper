@@ -281,8 +281,8 @@ def indeed_search(locations, job_titles):
             job_listings.append(job_df)
             # print(job_post[1]) #print the titles of the jobs being found
         except (ValueError, AssertionError) as e:
-            print('An error occurred, it was: {}'.format(e))
-            print('https://www.indeed.com/jobs?q={0}&l={1}&start={2}&fromage=1'.format(job, str(query), str(start)))
+            print(f'An error occurred, it was: {e}')
+            print(f'https://www.indeed.com/jobs?q={job}&l={str(query)}&start={str(start)}&fromage=1')
             # print(job_post)
             pass
     listing_df = pd.concat(job_listings)
@@ -348,14 +348,14 @@ def filter_found_jobs(job_results):
     unscored_jobs_df.loc[:, 'score'] += unscored_jobs_df.job_title.apply(title_score)
     filtered_jobs = unscored_jobs_df[unscored_jobs_df.score > 2].sort_values('score', ascending=False)
 
-    print('{0} jobs found'.format(len(filtered_jobs)))
+    print(f'{len(filtered_jobs)} jobs found')
     return(filtered_jobs)
 
 
 # ## Upload jobs to G-Sheets
 def update_google_sheets(jobs, auth_token_path):
     job_listings = jobs.values.tolist()
-    print("{0} jobs found, starting upload to Google sheet.".format(len(job_listings)))
+    print(f"{len(job_listings)} jobs found, starting upload to Google sheet.")
     dir_path = os.path.dirname(os.path.abspath(__file__))
     gc = pygsheets.authorize(service_file=auth_token_path, no_cache=True)
     # Open spreadsheet and then worksheet
@@ -368,7 +368,7 @@ def update_google_sheets(jobs, auth_token_path):
             wks.insert_rows(row=7, values=job_listings)  # if only 1 job then only insert 1 row
     except Exception as e:
         print('Insertion of data to google sheet failed.')
-        print('Here is the error: {0}'.format(e))
+        print(f'Here is the error: {e}')
 
 
 def email_summary(jobs):
@@ -378,8 +378,8 @@ def email_summary(jobs):
     filtered_jobs = jobs.copy()
     # # Send summary email. Most code in gmail_sender.py
     high_scoring_jobs = len(filtered_jobs[filtered_jobs.score > 6])
-    email_message = 'Hi Honey,<br /> The script was just run and {0} jobs were found. {1} jobs appear to have a pretty high relevance score'.format(len(filtered_jobs), high_scoring_jobs)
-    subject = 'Job postings on {0}'.format(datetime.now().strftime('%m/%d'))
+    email_message = f'Hi Honey,<br /> The script was just run and {len(filtered_jobs)} jobs were found. {high_scoring_jobs} jobs appear to have a pretty high relevance score'
+    subject = f"Job postings on {datetime.now().strftime('%m/%d')}"
     email.create_and_send_message(private.email['J'], private.email['A'], subject, email_message)
 
 def get_args():
