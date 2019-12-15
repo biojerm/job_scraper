@@ -138,7 +138,7 @@ def job_listings():
 
 def test_parse_posting(job_listings):
     job_details = scraper.parse_posting(job_listings)
-    assert len(job_details) == 15, 'Should have 15 job postings'
+    assert len(job_details) == 1, 'Should have 1 job postings'
     assert job_details[-1][0] == str(datetime.now().date()), 'First element is the date'
     assert job_details[-1][1] == 'Tax accounting assistant/Bookkeeper', 'Second element is the job title'
     assert job_details[-1][2] == 'Bennet Shay CPAs', 'Third element is the company name'
