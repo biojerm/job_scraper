@@ -1,4 +1,5 @@
 #!/home/jeremy/miniconda3/envs/py3k/bin/python
+
 # coding: utf-8
 from datetime import datetime
 import os
@@ -6,6 +7,8 @@ import re
 import time
 import requests
 import itertools
+import argparse
+import sys
 
 from bs4 import BeautifulSoup
 from nltk.tokenize import word_tokenize
@@ -92,7 +95,6 @@ def salary_sufficient(comp_stmnt: str, suff_salary: int) -> bool:
         interval = pay_interval(comp_stmnt)
         if rate_str and interval:
             rate = calculate_salary(rate_str, interval)
-            # import pdb; pdb.set_trace()
             if rate >= suff_salary:
                 sufficient = True
     except ValueError:
@@ -138,18 +140,18 @@ def title_score(title):
     return score
 
 
-query_set = ['Washington' ]
-    # 'California', 'Oregon', 'Washington', 'Nevada', 'Utah', 'Colorado',
-    # 'Montana', 'Idaho', 'Wyoming', 'Nebraska', 'New+Mexico', 'Texas',
-    # 'Missouri', 'Minnesota', 'Michigan', 'Wisconsin', 'Illinois', 'Ohio',
-    # 'West+Virgina', 'North+Carolina', 'South+Carolina', 'Virgina', 'Maryland',
-    # 'Pennsylvania', 'New+York', 'New+Jersey', 'Delaware', 'Massachusetts',
-    # 'Vermont', 'New+Hampshire', 'Maine', 'Tennessee', 'Iowa'
-# ]
-job_titles = ['tax+attorney']
-    # 'tax+attorney', 'international+tax+planning', 'tax+planning',
-    # 'tax+associate'
-# ]
+query_set = ['Washington',
+    'California', 'Oregon', 'Washington', 'Nevada', 'Utah', 'Colorado',
+    'Montana', 'Idaho', 'Wyoming', 'Nebraska', 'New+Mexico', 'Texas',
+    'Missouri', 'Minnesota', 'Michigan', 'Wisconsin', 'Illinois', 'Ohio',
+    'West+Virgina', 'North+Carolina', 'South+Carolina', 'Virgina', 'Maryland',
+    'Pennsylvania', 'New+York', 'New+Jersey', 'Delaware', 'Massachusetts',
+    'Vermont', 'New+Hampshire', 'Maine', 'Tennessee', 'Iowa'
+]
+job_titles = ['tax+attorney',
+    'tax+attorney', 'international+tax+planning', 'tax+planning',
+    'tax+associate'
+]
 
 def indeed_url(job, location, posting_offset):
     """Returns Indeed.com API url for job query
@@ -214,7 +216,7 @@ class JobPost:
 
 
     def _summary_text(self):
-        summary_element = self.listing.find('span', attrs={'class': 'summary'})
+        summary_element = self.listing.find('div', attrs={'class': 'summary'})
         summary = ''
         if summary_element:
             summary = summary_element.text.strip()
@@ -296,7 +298,6 @@ def indeed_search(locations, job_titles):
             # print(job_post)
             pass
     listing_df = pd.concat(job_listings)
-    end_time = datetime.now()
     return listing_df
 
 
@@ -364,11 +365,11 @@ def filter_found_jobs(job_results):
 
 
 # ## Upload jobs to G-Sheets
-def update_google_sheets(jobs):
+def update_google_sheets(jobs, auth_token_path):
     job_listings = jobs.values.tolist()
     print("{0} jobs found, starting upload to Google sheet.".format(len(job_listings)))
     dir_path = os.path.dirname(os.path.abspath(__file__))
-    gc = pygsheets.authorize(service_file=os.path.join(dir_path, 'jobsheet-auth.json'), no_cache=True)
+    gc = pygsheets.authorize(service_file=auth_token_path, no_cache=True)
     # Open spreadsheet and then worksheet
     sh = gc.open('Indeed Job Sheet')
     wks = sh.worksheet_by_title('Job Posts')
@@ -383,9 +384,8 @@ def update_google_sheets(jobs):
 
 
 def email_summary(jobs):
-    '''
-    Sends an email summary of jobs found.  Would need to update private.py file and private.email['x'] below
-    to work on other instument
+    '''Sends an email summary of jobs found.  Would need to update private.py
+    file and private.email['x'] below to work on other instument
     '''
     filtered_jobs = jobs.copy()
     # # Send summary email. Most code in gmail_sender.py
@@ -394,8 +394,15 @@ def email_summary(jobs):
     subject = 'Job postings on {0}'.format(datetime.now().strftime('%m/%d'))
     email.create_and_send_message(private.email['J'], private.email['A'], subject, email_message)
 
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('auth_token',
+                        help="Path to google sheets authorization token")
+    cli_args = parser.parse_args()
+    return cli_args
 
 if __name__ == '__main__':
+    args = get_args()
     jobs = filter_found_jobs(indeed_search(query_set, job_titles))
-    update_google_sheets(jobs)
+    update_google_sheets(jobs, args.auth_token)
     # email_summary(jobs)
