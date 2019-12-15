@@ -140,18 +140,6 @@ def title_score(title):
     return score
 
 
-query_set = ['Washington',
-    'California', 'Oregon', 'Washington', 'Nevada', 'Utah', 'Colorado',
-    'Montana', 'Idaho', 'Wyoming', 'Nebraska', 'New+Mexico', 'Texas',
-    'Missouri', 'Minnesota', 'Michigan', 'Wisconsin', 'Illinois', 'Ohio',
-    'West+Virgina', 'North+Carolina', 'South+Carolina', 'Virgina', 'Maryland',
-    'Pennsylvania', 'New+York', 'New+Jersey', 'Delaware', 'Massachusetts',
-    'Vermont', 'New+Hampshire', 'Maine', 'Tennessee', 'Iowa'
-]
-job_titles = ['tax+attorney',
-    'tax+attorney', 'international+tax+planning', 'tax+planning',
-    'tax+associate'
-]
 
 def indeed_url(job, location, posting_offset):
     """Returns Indeed.com API url for job query
@@ -402,6 +390,18 @@ def get_args():
     return cli_args
 
 if __name__ == '__main__':
+    query_set = ['Washington',
+    'California', 'Oregon', 'Washington', 'Nevada', 'Utah', 'Colorado',
+    'Montana', 'Idaho', 'Wyoming', 'Nebraska', 'New+Mexico', 'Texas',
+    'Missouri', 'Minnesota', 'Michigan', 'Wisconsin', 'Illinois', 'Ohio',
+    'West+Virgina', 'North+Carolina', 'South+Carolina', 'Virgina', 'Maryland',
+    'Pennsylvania', 'New+York', 'New+Jersey', 'Delaware', 'Massachusetts',
+    'Vermont', 'New+Hampshire', 'Maine', 'Tennessee', 'Iowa'
+    ]
+    job_titles = ['tax+attorney',
+    'tax+attorney', 'international+tax+planning', 'tax+planning',
+    'tax+associate'
+    ]
     args = get_args()
     jobs = filter_found_jobs(indeed_search(query_set, job_titles))
     update_google_sheets(jobs, args.auth_token)
