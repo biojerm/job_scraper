@@ -391,7 +391,7 @@ def email_summary(jobs):
     """
     filtered_jobs = jobs.copy()
     high_scoring_jobs = len(filtered_jobs[filtered_jobs.score > 6])
-    email_message = ('Hi Honey,<br /> The script was just run and '
+    email_message = ('Hi,<br /> The script was just run and '
                      f'{len(filtered_jobs)} jobs were found. '
                      f'{high_scoring_jobs} jobs appear to have a '
                      'pretty high relevance score')
