@@ -424,5 +424,5 @@ if __name__ == '__main__':
     args = get_args()
     jobs = filter_found_jobs(indeed_search(query_set, job_titles))
     update_google_sheets(jobs, args.auth_token)
-    # email_summary(jobs)
+    email_summary(jobs)
 
