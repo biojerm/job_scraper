@@ -1,15 +1,13 @@
-#!/home/jeremy/miniconda3/envs/py3k/bin/python
+#!/home/jeremy/miniconda3/envs/py3k/bin/pytho
 
-# coding: utf-8
 from datetime import datetime
 import os
 import re
 import time
-import requests
 import itertools
 import argparse
-import sys
 
+import requests
 from bs4 import BeautifulSoup
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
@@ -157,15 +155,16 @@ def indeed_url(job, location, posting_offset):
 
 
 class JobPost:
+    """JobPost parses a BeautifulSoup object from Indeed.com"""
     def __init__(self, html_soup):
         self.listing = html_soup
         self.current_date = str(datetime.now().date())
 
 
     def _job_title(self):
-        title_element = self.listing.find(name='a',
-                                              attrs={'data-tn-element':
-                                                     'jobTitle'})
+        """Parses job title from Indeed posting"""
+        title_element = self.listing.find(
+            name='a', attrs={'data-tn-element': 'jobTitle'})
         title = ''
         if title_element:
             title = title_element.text.strip()
@@ -174,8 +173,9 @@ class JobPost:
 
 
     def _company_name(self):
-        company_element = self.listing.find(name='span',
-                                                attrs={'class': 'company'})
+        """Parse company name fom Indeed job posting"""
+        company_element = self.listing.find(
+            name='span', attrs={'class': 'company'})
         company = ''
         if company_element:
             company = company_element.text.strip()
@@ -184,6 +184,7 @@ class JobPost:
 
 
     def _location(self):
+        """Parse job location from Indeed job post"""
 
         location_element = self.listing.find('span',
                                              attrs={'class': 'location'})
@@ -204,6 +205,7 @@ class JobPost:
 
 
     def _summary_text(self):
+        """Parse job summary from Indeed job post"""
         summary_element = self.listing.find('div', attrs={'class': 'summary'})
         summary = ''
         if summary_element:
@@ -212,12 +214,14 @@ class JobPost:
         return summary
 
     def _job_url(self):
+        """Parse url of job post in Indeed job post"""
         url_element = self.listing.find(name='a',
                                         attrs={'data-tn-element': 'jobTitle'})
         url = f"www.indeed.com{url_element['href']}"
         return url
 
     def _salary(self):
+        """Parse salary string from Indeed job post"""
         salary_element = self.listing.find(name='span',
                                            attrs={'class':'no-wrap'})
         salary = ''
@@ -230,6 +234,9 @@ class JobPost:
 
 
     def get_details(self):
+        """Assembles the details of a job post
+
+        Returns (lst): Job posting information"""
         date = self.current_date
         job_title = self._job_title()
         company_name = self._company_name()
@@ -243,19 +250,24 @@ class JobPost:
 
 
 def parse_posting(page_text):
+    """Parse the job postings of each page from Indeed.com
+
+    :param page_text: raw text form webpage
+
+    Returns list of job postsings (list of lists)
+    """
     job_listings = []
     soup = BeautifulSoup(page_text, 'lxml')
     for div in soup.find_all(name='div', attrs={'class': 'row'}):
         job_post = JobPost(div)
         job_listings.append(job_post.get_details())
-    return(job_listings)
+    return job_listings
 
 def indeed_search(locations, job_titles):
-    '''
-    returns a dataframe with job postings from indeed.com using API.
+    """
+    returns a dataframe with job postings from Indeed.com using API.
     Provide array of locations and job titles to search
-    '''
-    query_set = locations
+    """
     max_results_per_city = 20
     columns = [
         'capture_date', 'job_title', 'company_name',
@@ -265,7 +277,7 @@ def indeed_search(locations, job_titles):
 
     # Web scraping code:
     jobs_per_page = range(0, max_results_per_city, 10)
-    query_keys = itertools.product(job_titles, query_set, jobs_per_page)
+    query_keys = itertools.product(job_titles, locations, jobs_per_page)
     for key_tup in query_keys:
         (job, query, start) = key_tup
         try:
@@ -279,21 +291,19 @@ def indeed_search(locations, job_titles):
         try:
             job_df = pd.DataFrame(job_post, columns=columns)
             job_listings.append(job_df)
-            # print(job_post[1]) #print the titles of the jobs being found
-        except (ValueError, AssertionError) as e:
-            print(f'An error occurred, it was: {e}')
-            print(f'https://www.indeed.com/jobs?q={job}&l={str(query)}&start={str(start)}&fromage=1')
-            # print(job_post)
-            pass
+        except (ValueError, AssertionError) as err:
+            print(f'An error occurred, it was: {err}')
+            print(f'https://www.indeed.com/jobs?q={job}&l={str(query)}'
+                  '&start={str(start)}&fromage=1')
     listing_df = pd.concat(job_listings)
     return listing_df
 
 
 def filter_found_jobs(job_results):
-    '''
-    Takes queried job results dataframe from indeed job search and
+    """
+    Takes queried job results dataframe from Indeed job search and
     filters out the results to a more manageable size
-    '''
+    """
     # Selection of companies and job titles that are not relevant
     bad_titles = [
         'paralegal', 'Paralegal', 'secretary', 'Secretary', 'clerk', 'Clerk',
@@ -348,12 +358,16 @@ def filter_found_jobs(job_results):
     unscored_jobs_df.loc[:, 'score'] += unscored_jobs_df.job_title.apply(title_score)
     filtered_jobs = unscored_jobs_df[unscored_jobs_df.score > 2].sort_values('score', ascending=False)
 
-    print(f'{len(filtered_jobs)} jobs found')
     return(filtered_jobs)
 
 
 # ## Upload jobs to G-Sheets
 def update_google_sheets(jobs, auth_token_path):
+    """update_google_sheets
+
+    :param jobs:
+    :param auth_token_path:
+    """
     job_listings = jobs.values.tolist()
     print(f"{len(job_listings)} jobs found, starting upload to Google sheet.")
     dir_path = os.path.dirname(os.path.abspath(__file__))
@@ -365,29 +379,34 @@ def update_google_sheets(jobs, auth_token_path):
         if any(isinstance(i, list) for i in job_listings):
             wks.insert_rows(row=7, number=len(job_listings), values=job_listings)
         else:
-            wks.insert_rows(row=7, values=job_listings)  # if only 1 job then only insert 1 row
+            wks.insert_rows(row=7, values=job_listings)
     except Exception as e:
         print('Insertion of data to google sheet failed.')
         print(f'Here is the error: {e}')
 
 
 def email_summary(jobs):
-    '''Sends an email summary of jobs found.  Would need to update private.py
+    """Sends an email summary of jobs found.  Would need to update private.py
     file and private.email['x'] below to work on other instument
-    '''
+    """
     filtered_jobs = jobs.copy()
-    # # Send summary email. Most code in gmail_sender.py
     high_scoring_jobs = len(filtered_jobs[filtered_jobs.score > 6])
-    email_message = f'Hi Honey,<br /> The script was just run and {len(filtered_jobs)} jobs were found. {high_scoring_jobs} jobs appear to have a pretty high relevance score'
+    email_message = ('Hi Honey,<br /> The script was just run and '
+                     f'{len(filtered_jobs)} jobs were found. '
+                     f'{high_scoring_jobs} jobs appear to have a '
+                     'pretty high relevance score')
     subject = f"Job postings on {datetime.now().strftime('%m/%d')}"
     email.create_and_send_message(private.email['J'], private.email['A'], subject, email_message)
 
+
 def get_args():
+    """Parse command line arguements"""
     parser = argparse.ArgumentParser()
     parser.add_argument('auth_token',
                         help="Path to google sheets authorization token")
     cli_args = parser.parse_args()
     return cli_args
+
 
 if __name__ == '__main__':
     query_set = ['Washington',
@@ -406,3 +425,4 @@ if __name__ == '__main__':
     jobs = filter_found_jobs(indeed_search(query_set, job_titles))
     update_google_sheets(jobs, args.auth_token)
     # email_summary(jobs)
+
