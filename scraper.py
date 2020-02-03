@@ -6,6 +6,7 @@ import re
 import time
 import itertools
 import argparse
+import json
 
 import requests
 from bs4 import BeautifulSoup
@@ -402,6 +403,8 @@ def email_summary(jobs):
 def get_args():
     """Parse command line arguements"""
     parser = argparse.ArgumentParser()
+    parser.add_argument('config',
+                        help="Path to json config file")
     parser.add_argument('auth_token',
                         help="Path to google sheets authorization token")
     cli_args = parser.parse_args()
@@ -409,20 +412,11 @@ def get_args():
 
 
 if __name__ == '__main__':
-    query_set = ['Washington',
-    'California', 'Oregon', 'Washington', 'Nevada', 'Utah', 'Colorado',
-    'Montana', 'Idaho', 'Wyoming', 'Nebraska', 'New+Mexico', 'Texas',
-    'Missouri', 'Minnesota', 'Michigan', 'Wisconsin', 'Illinois', 'Ohio',
-    'West+Virgina', 'North+Carolina', 'South+Carolina', 'Virgina', 'Maryland',
-    'Pennsylvania', 'New+York', 'New+Jersey', 'Delaware', 'Massachusetts',
-    'Vermont', 'New+Hampshire', 'Maine', 'Tennessee', 'Iowa'
-    ]
-    job_titles = ['tax+attorney',
-    'tax+attorney', 'international+tax+planning', 'tax+planning',
-    'tax+associate'
-    ]
     args = get_args()
-    jobs = filter_found_jobs(indeed_search(query_set, job_titles))
+    with open(args.config, 'r') as json_file:
+        config = json.load(json_file)
+    job_queries = indeed_search(config["state_query"], config["job_titles"])
+    jobs = filter_found_jobs(job_queries)
     update_google_sheets(jobs, args.auth_token)
     email_summary(jobs)
 
