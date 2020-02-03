@@ -249,6 +249,10 @@ class JobPost:
         return [date, job_title, company_name, city,
                 state, summary, url, salary]
 
+def contains_text(row, required_words):
+    row_tokens = set(word_tokenize(row.lower()))
+    required_set = set(map(str.lower,required_words))
+    return bool(row_tokens & required_set)
 
 def parse_posting(page_text):
     """Parse the job postings of each page from Indeed.com

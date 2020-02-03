@@ -215,6 +215,19 @@ class TestJobPost:
         post = scraper.JobPost(page_soup)
         details = post.get_details()
         assert len(details) == 8
+
+
+class TestContainsText:
+
+    def test_returns_true_correctly(self):
+        summary = 'hello my name is'
+        result = scraper.contains_text(summary, ['hello'])
+        assert result
+
+    def test_returns_false_if_no_word(self):
+        summary = 'hello my name is'
+        result = scraper.contains_text(summary, ['absent'])
+        assert not result
 # indeed_search
 
 # things to test:
