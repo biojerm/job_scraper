@@ -341,8 +341,11 @@ def filter_found_jobs(job_results):
         'HR block'
     ]
     # filtering out duplicate entries
-    remove_duplicates_df = job_results.drop_duplicates(subset=['job_title', 'company_name', 'city', 'state', 'summary'], keep='first').copy()
-    remove_duplicates_df.drop_duplicates(subset='link', keep='first', inplace=True)
+    remove_duplicates_df = job_results.drop_duplicates(subset=['job_title',
+        'company_name', 'city', 'state', 'summary'], keep='first').copy()
+    remove_duplicates_df.drop_duplicates(subset='link',
+                                         keep='first',
+                                         inplace=True)
     # The word 'tax' must be in the summary
     tax_in_summary_index = ['tax' in row or 'Tax' in row for row in remove_duplicates_df['summary']]
     # Check if salary is sufficient in posting
