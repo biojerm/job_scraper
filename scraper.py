@@ -16,9 +16,7 @@ import pandas as pd
 import pygsheets
 
 
-# files with helper methods and private passwords/keys/emailaddresses
 import gmail_sender as email
-import private  # file with private information
 
 
 # ### Helper Methods ###
@@ -363,8 +361,7 @@ def update_google_sheets(jobs, auth_token_path):
 
 
 def email_summary(jobs, sender, recipient):
-    """Sends an email summary of jobs found.  Would need to update private.py
-    file and private.email['x'] below to work on other instument
+    """Sends an email summary of jobs found.
     """
     filtered_jobs = jobs.copy()
     high_scoring_jobs = len(filtered_jobs[filtered_jobs.score > 6])
