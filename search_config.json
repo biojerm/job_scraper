@@ -1,5 +1,9 @@
 {
 
+"sender": "example@example.com",
+
+"recipient": "example@example.com",
+
 "state_query": [
     "Washington"
      ],
