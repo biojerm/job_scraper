@@ -362,7 +362,7 @@ def update_google_sheets(jobs, auth_token_path):
         print(f'Here is the error: {e}')
 
 
-def email_summary(jobs):
+def email_summary(jobs, sender, recipient):
     """Sends an email summary of jobs found.  Would need to update private.py
     file and private.email['x'] below to work on other instument
     """
@@ -373,7 +373,7 @@ def email_summary(jobs):
                      f'{high_scoring_jobs} jobs appear to have a '
                      'pretty high relevance score')
     subject = f"Job postings on {datetime.now().strftime('%m/%d')}"
-    email.create_and_send_message(private.email['J'], private.email['A'], subject, email_message)
+    email.create_and_send_message(sender, recipient, subject, email_message)
 
 
 def get_args():
@@ -394,5 +394,5 @@ if __name__ == '__main__':
     job_queries = indeed_search(config["state_query"], config["job_titles"])
     jobs = filter_found_jobs(job_queries, config)
     update_google_sheets(jobs, args.auth_token)
-    email_summary(jobs)
+    email_summary(jobs, config['sender'], config['recipient'])
 
