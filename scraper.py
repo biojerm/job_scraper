@@ -304,46 +304,14 @@ def indeed_search(locations, job_titles):
     return listing_df
 
 
-def filter_found_jobs(job_results):
+def filter_found_jobs(job_results, config):
     """
     Takes queried job results dataframe from Indeed job search and
     filters out the results to a more manageable size
     """
     # Selection of companies and job titles that are not relevant
-    bad_titles = [
-        'paralegal', 'Paralegal', 'secretary', 'Secretary', 'clerk', 'Clerk',
-        'closer', 'Closer', 'Engineer', 'engineer', 'service', 'Service', 'Care',
-        'care', 'Administrator', 'administrator', 'accountant', 'Accountant',
-        'customer', 'Customer', 'nurse', 'Nurse', 'Help', 'help', 'science',
-        'Science', 'loan', 'Loan', 'energy', 'Energy', 'marketing', 'Marketing',
-        'assistant', 'Assistant', 'CPA', 'Research', 'research', 'PARALEGAL',
-        'Financial Advisor', 'HR', 'Licensing Specialist', 'Furnishings Officer',
-        'Intern', 'Licensed Customs Broker', 'Real Estate', 'Neurology',
-        'Physician', 'Lending', 'Financial Controller', 'Accounts Payable',
-        'payroll', 'Payroll', 'Justice', 'sales', 'Sales', 'Finance Manager',
-        'Retail', 'Bookkeeper', 'Banker', 'IT', 'RN', 'Buyer', 'Accounting',
-        'Mortgage', 'Shared Living Provider', 'Night Auditor',
-        'Relationship Associate', 'product specialist', 'Title Agent',
-        'WM Investment', 'Receptionist', 'Sourcing', 'SOURCING', 'Clinic',
-        'Property', 'Business Analyst', 'Developer', 'Administrative',
-        'Collections', 'Preparer', 'Architect', 'Mobility', 'Wealth', 'WM',
-        'Pricing', 'Estate', 'Information Technology', 'Financial Analyst',
-        'Fixed Income', 'Valuation', 'Creative', 'Escrow', 'Benefits Attorney',
-        'Cashier', 'Compliance Specialist', 'Front Desk Supervisor',
-        'People & Culture Sr. Associate', 'Staffing Coordinator', 'Technician',
-        'Part-time', 'Actuarial', 'RETAIL', 'HUD', 'LIHCT', 'Supply Chain',
-        'Program Budget Lead', 'Auto Delivery Specialist', 'Relationship',
-        'Coder', 'WEALTH', 'part time', 'Billing', 'Trust Officer', 'QA', 'CEO',
-        'CFO', 'Scientist'
-    ]
-    bad_companies = [
-        'Block Advisors Tax and Business Services', 'The Vitamin Shoppe',
-        'Staffing', 'H&R Block', 'FirstService Residential', 'Allied Universal',
-        'CareOregon, Inc.', 'Catholic Charities', 'Golden Nugget',
-        'Scott Credit Union', 'Royal American Management, Inc.', 'Block Advisors',
-        'Mercer Transportation', 'Transportation Security Administration',
-        'HR block'
-    ]
+    bad_titles = config['bad_titles']
+    bad_companies = config['bad_companies']
     # filtering out duplicate entries
     remove_duplicates_df = job_results.drop_duplicates(subset=['job_title',
         'company_name', 'city', 'state', 'summary'], keep='first').copy()
@@ -351,10 +319,11 @@ def filter_found_jobs(job_results):
                                          keep='first',
                                          inplace=True)
     # The word 'tax' must be in the summary
-    tax_in_summary_index = ['tax' in row or 'Tax' in row for row in remove_duplicates_df['summary']]
+    tax_in_summary_index = remove_duplicates_df['summary'].apply(contains_text,
+                                                                 args=(['Tax'],))
     # Check if salary is sufficient in posting
     salary_index = remove_duplicates_df.salary.apply(salary_sufficient,
-            args=(120000,))
+            args=(config['required_salary'],))
     # Removing specific companies and job titles
     bad_title_index = ~remove_duplicates_df.job_title.isin(bad_titles)
     bad_company_index = ~remove_duplicates_df.company_name.isin(bad_companies)
@@ -423,7 +392,7 @@ if __name__ == '__main__':
     with open(args.config, 'r') as json_file:
         config = json.load(json_file)
     job_queries = indeed_search(config["state_query"], config["job_titles"])
-    jobs = filter_found_jobs(job_queries)
+    jobs = filter_found_jobs(job_queries, config)
     update_google_sheets(jobs, args.auth_token)
     email_summary(jobs)
 
