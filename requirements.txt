@@ -1,9 +1,11 @@
-nltk==3.4.5
-pandas==0.24.2
-httplib2==0.14.0
+google_auth_oauthlib==0.4.1
 pytest==5.0.1
-pygsheets==2.0.2
 requests==2.22.0
 oauth2client==4.1.3
+pandas==0.24.2
+httplib2==0.14.0
+pygsheets==2.0.2
+nltk==3.4.5
 beautifulsoup4==4.8.2
 google_api_python_client==1.7.11
+protobuf==3.11.3
