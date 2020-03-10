@@ -13,16 +13,14 @@ from oauth2client import client
 from oauth2client import tools
 from oauth2client.file import Storage
 
-import private  # private.py has dictionary with emails
-
 # If modifying these scopes, delete your previously saved credentials
 # at ~/.credentials/gmail-python-quickstart.json
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
 
 SCOPES = 'https://www.googleapis.com/auth/gmail.send'
-CLIENT_SECRET_FILE = os.path.join(dir_path, 'client_secret_2.json')  # replace with your client_secret.json file
-APPLICATION_NAME = 'Gmail API Python Quickstart'
+CLIENT_SECRET_FILE = 'credentials.json'
+APPLICATION_NAME = 'IndeedJobScraper_Gmail'
 
 
 def get_credentials():
@@ -46,10 +44,7 @@ def get_credentials():
     if not credentials or credentials.invalid:
         flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
         flow.user_agent = APPLICATION_NAME
-        if flags:
-            credentials = tools.run_flow(flow, store, flags)
-        else:  # Needed only for compatibility with Python 2.6
-            credentials = tools.run(flow, store)
+        credentials = tools.run_flow(flow, store)
         print('Storing credentials to ' + credential_path)
     return credentials
 
@@ -105,9 +100,5 @@ def create_and_send_message(sender, reciever, subject, message):
 
 
 if __name__ == '__main__':
-    # Update these with emails from the private.py file if running as main method
-    message = create_message(private.email['J'], private.email['J'], 'test subject', 'test body')
-    credentials = get_credentials()
-    http = credentials.authorize(httplib2.Http())
-    service = discovery.build('gmail', 'v1', http=http)
-    send_message(service, 'me', message)
+    create_and_send_message('jeremylabarge@gmail.com','jeremylabarge@gmail.com',
+            'test', 'test_message')

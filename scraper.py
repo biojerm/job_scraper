@@ -316,9 +316,8 @@ def filter_found_jobs(job_results, config):
     remove_duplicates_df.drop_duplicates(subset='link',
                                          keep='first',
                                          inplace=True)
-    # The word 'tax' must be in the summary
-    tax_in_summary_index = remove_duplicates_df['summary'].apply(contains_text,
-                                                                 args=(['Tax'],))
+    summary_words_index = remove_duplicates_df['summary'].apply(contains_text,
+                                          args=(config['summary_text_words'],))
     # Check if salary is sufficient in posting
     salary_index = remove_duplicates_df.salary.apply(salary_sufficient,
             args=(config['required_salary'],))
@@ -326,13 +325,12 @@ def filter_found_jobs(job_results, config):
     bad_title_index = ~remove_duplicates_df.job_title.isin(bad_titles)
     bad_company_index = ~remove_duplicates_df.company_name.isin(bad_companies)
     # applying all filtration jobs dataframe
-    unscored_jobs_df = remove_duplicates_df.loc[tax_in_summary_index & salary_index & bad_title_index & bad_company_index, :].copy()
+    unscored_jobs_df = remove_duplicates_df.loc[summary_words_index & salary_index & bad_title_index & bad_company_index, :].copy()
     # scoring summary based on relevance
-    unscored_jobs_df.loc[:, 'score'] = unscored_jobs_df.summary.apply(summary_score)
+    # unscored_jobs_df.loc[:, 'score'] = unscored_jobs_df.summary.apply(summary_score)
     # scoring title based on relevance
-    unscored_jobs_df.loc[:, 'score'] += unscored_jobs_df.job_title.apply(title_score)
+    unscored_jobs_df['score'] = 6  # += unscored_jobs_df.job_title.apply(title_score)
     filtered_jobs = unscored_jobs_df[unscored_jobs_df.score > 2].sort_values('score', ascending=False)
-
     return(filtered_jobs)
 
 
