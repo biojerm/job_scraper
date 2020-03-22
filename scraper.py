@@ -1,4 +1,4 @@
-#!/home/jeremy/miniconda3/envs/py3k/bin/pytho
+#!/home/jeremy/miniconda3/envs/py3k/bin/python
 
 from datetime import datetime
 import os
@@ -110,9 +110,8 @@ def summary_score(summary):
     tokenized_summary = word_tokenize(summary.lower())
     summary_no_stop = filter(lambda x: x not in stop_words, tokenized_summary)
     # keep these all lowercase
-    good_words = {'tax', 'international', 'corporate', 'law', 'attorney',
-                  'LLM', 'planning'}
-    bad_words = {'preparation', 'gift', 'estates', 'cpa', 'controller'}
+    good_words = {'software', 'developer', 'python'}
+    bad_words = {'mentor', 'intern', 'senior',}
     for word in summary_no_stop:
         if word in good_words:
             score += 1
@@ -123,16 +122,12 @@ def summary_score(summary):
 
 def title_score(title):
     """
-     The word tax must be in the first, second, or last word of title.
-     Second word allowed because sometimes there is a qualifier
-     ex: 'Senior Tax Manager'
-     Last word often tax like 'Senior Manager - tax'
+    check if python is in the title
     """
     score = 0
-    token_title = word_tokenize(title.lower())
-    if 'tax' in token_title[0:2] or 'tax' in token_title[-1]:
+    if 'python' in title:
         score += 2
-    else:
+    if title in {'Senior', 'Sr.', 'senior', 'sr.'}:
         score -= 2
     return score
 
@@ -271,7 +266,7 @@ def indeed_search(locations, job_titles):
     returns a dataframe with job postings from Indeed.com using API.
     Provide array of locations and job titles to search
     """
-    max_results_per_city = 20
+    max_results_per_city = 50
     columns = [
         'capture_date', 'job_title', 'company_name',
         'city', 'state', 'summary', 'link', 'salary'
@@ -327,10 +322,10 @@ def filter_found_jobs(job_results, config):
     # applying all filtration jobs dataframe
     unscored_jobs_df = remove_duplicates_df.loc[summary_words_index & salary_index & bad_title_index & bad_company_index, :].copy()
     # scoring summary based on relevance
-    # unscored_jobs_df.loc[:, 'score'] = unscored_jobs_df.summary.apply(summary_score)
+    unscored_jobs_df.loc[:, 'score'] = unscored_jobs_df.summary.apply(summary_score)
     # scoring title based on relevance
-    unscored_jobs_df['score'] = 6  # += unscored_jobs_df.job_title.apply(title_score)
-    filtered_jobs = unscored_jobs_df[unscored_jobs_df.score > 2].sort_values('score', ascending=False)
+    unscored_jobs_df['score'] += unscored_jobs_df.job_title.apply(title_score)
+    filtered_jobs = unscored_jobs_df[unscored_jobs_df.score >= 0].sort_values('score', ascending=False)
     return(filtered_jobs)
 
 
