@@ -46,6 +46,9 @@ file_dump/
 __pycache__/
 client_secret.json
 client_secret_2.json
+jl_search_config.json
+jobsheet_auth.json
+credentials.json
 .ipynb_checkpoints/
 *.ipynb
 private.*
