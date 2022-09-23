@@ -8,4 +8,4 @@ pygsheets==2.0.2
 nltk==3.4.5
 beautifulsoup4==4.8.2
 google_api_python_client==1.7.11
-protobuf==3.11.3
+protobuf==3.18.3
